@@ -1,0 +1,28 @@
+/* Resetting default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background-color: #f4f4f4;
+}
+
+/* Navbar styles */
+
+.navbar-container {
+  padding: 10px;
+}
+
+/* Main content styles */
+
+.content-container {
+  width: 100%;
+  height: 100%;
+  padding: 30px 50px;
+  margin: 0 auto;
+}

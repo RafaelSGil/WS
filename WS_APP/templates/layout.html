@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}MoviePedia{% endblock %}</title>
+    <!-- Add your CSS links here -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/layout.css' %}" />
+
+    {% load bootstrap5 %} {% bootstrap_css %} {% bootstrap_javascript %}
+  </head>
+  <body>
+    <nav class="navbar navbar-container navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="{% url 'home' %}">MoviePedia</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <a class="nav-item nav-link active" href="{% url 'home' %}">Home</a>
+          <a class="nav-item nav-link" href="{% url 'movie_search' %}"
+            >Search</a
+          >
+          <a class="nav-item nav-link" href="#">Pricing</a>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <div class="content-container">
+        {% block content %}
+        <!-- This is where the content of each page will be inserted -->
+        {% endblock %}
+      </div>
+    </main>
+
+    <footer class="bg-dark text-light text-center py-4 fixed-bottom">
+      <div class="container">
+        <p>&copy; {% now "Y" %} Your Django Project. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="{% static 'scripts/scroll.js' %}"></script>
+  </body>
+</html>

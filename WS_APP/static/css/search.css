@@ -1,0 +1,14 @@
+.container-card {
+  overflow-x: auto;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.card {
+  display: inline-block;
+  width: 18rem;
+  margin: 10px;
+  height: 100%;
+}
+.card-break {
+  white-space: break-spaces;
+}

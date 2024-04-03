@@ -1,0 +1,71 @@
+{% extends 'layout.html' %} {% block content %}
+
+<div class="container mt-5 mb-30">
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit" name="all-movies" class="btn btn-danger">
+      All movies
+    </button>
+  </form>
+
+  {% if all_result %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+
+  <div class="container-card" onwheel="horizontalScroll(event)">
+    {% for entry in all_result %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title card-break">{{ entry.movies.value }}</h5>
+        <p class="card-text card-break">{{ entry.desc.value }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+
+  <br />
+  <form method="POST">
+    {% csrf_token %} {{ form.as_p }}
+    <br />
+    <button type="submit" class="btn btn-primary">Search</button>
+  </form>
+
+  {% if search_result %}
+  <h1 class="mt-5 mb-3">Movie Information</h1>
+  <div class="row">
+    {% for entry in search_result %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{{ entry.title.value }}</h5>
+          <p class="card-text"><strong>Cast:</strong> {{ entry.cast.value }}</p>
+          <p class="card-text">
+            <strong>Release:</strong> {{ entry.release.value }}
+          </p>
+          <p class="card-text">
+            <strong>Genres:</strong> {{ entry.genres.value }}
+          </p>
+          <p class="card-text">
+            <strong>Director:</strong> {{ entry.director.value }}
+          </p>
+          <p class="card-text">
+            <strong>Country:</strong> {{ entry.country.value }}
+          </p>
+          <p class="card-text">
+            <strong>Rating:</strong> {{ entry.rating.value }}
+          </p>
+          <p class="card-text">
+            <strong>Duration:</strong> {{ entry.duration.value }}
+          </p>
+          <p class="card-text">
+            <strong>Description:</strong> {{ entry.description.value }}
+          </p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
