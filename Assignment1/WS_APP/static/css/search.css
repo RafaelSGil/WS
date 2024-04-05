@@ -1,18 +1,40 @@
 .container-card {
   overflow-x: auto;
   white-space: nowrap;
-  max-width: 100%;
-  margin-top: -60px;
+  display: flex;
+  flex-wrap: nowrap;
 }
 
 .card {
-  display: inline-block;
+  flex: 0 0 auto;
   width: 18rem;
   margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+}
+
+.card-text {
+  max-width: 16rem;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-height: 3em;
+  cursor: pointer;
+}
+
+.card-text.show-all-text {
+  max-height: none;
+  overflow: visible;
+  white-space: normal;
 }
 
 .card-break {
   white-space: break-spaces;
-  min-height: 50px;
 }
