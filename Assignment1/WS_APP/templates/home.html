@@ -7,7 +7,7 @@
   <br />
   <br />
   {% if all_result %} {% load static %}
-  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
 
   <h3>Every movie available</h3>
 
@@ -16,7 +16,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="card-title card-break">{{ entry.movies.value }}</h5>
-        <p class="card-text card-break">{{ entry.desc.value }}</p>
+        <p class="card-text card-break">{{ entry.description.value }}</p>
       </div>
     </div>
     {% endfor %}
