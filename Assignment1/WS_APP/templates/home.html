@@ -1,0 +1,26 @@
+{% extends 'layout.html' %} {% block content %}
+
+<div class="container mt-5">
+  <h1>Welcome to MoviePedia</h1>
+  <p>Discover, explore, and share your favorite movies with MoviePedia!</p>
+
+  <br />
+  <br />
+  {% if all_result %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+
+  <h3>Every movie available</h3>
+
+  <div class="container-card" onwheel="horizontalScroll(event)">
+    {% for entry in all_result %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title card-break">{{ entry.movies.value }}</h5>
+        <p class="card-text card-break">{{ entry.desc.value }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endif %} {% endblock %}

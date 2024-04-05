@@ -1,29 +1,7 @@
 {% extends 'layout.html' %} {% block content %}
 
-<div class="container mt-5 mb-30">
-  <form method="POST">
-    {% csrf_token %}
-    <button type="submit" name="all-movies" class="btn btn-danger">
-      All movies
-    </button>
-  </form>
-
-  {% if all_result %} {% load static %}
-  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
-
-  <div class="container-card" onwheel="horizontalScroll(event)">
-    {% for entry in all_result %}
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title card-break">{{ entry.movies.value }}</h5>
-        <p class="card-text card-break">{{ entry.desc.value }}</p>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-
-  {% endif %}
-
+<div class="container mt-2 mb-10">
+  <h1>Search for a specific movie</h1>
   <br />
   <form method="POST">
     {% csrf_token %} {{ form.as_p }}

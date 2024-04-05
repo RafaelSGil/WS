@@ -15,14 +15,9 @@ from WS_APP.forms import MovieForm
 # Create your views here.
 def home(request):
     """Renders the home page."""
-    """assert isinstance(request, HttpRequest)"""
-    
-    return render(request, 'home.html')
+    assert isinstance(request, HttpRequest)
 
-def movie_search(request):
-    if request.method == 'POST':
-        if "all-movies" in request.POST:
-            query = """
+    query = """
                         PREFIX net: <http://ws.org/netflix_info/>
 
                         SELECT ?movies ?desc
@@ -32,13 +27,14 @@ def movie_search(request):
                         }
                     """
             
-            payload_query = { "query": query }
-            res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
-            res = json.loads(res)
+    payload_query = { "query": query }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    res = json.loads(res)
+    
+    return render(request, 'home.html', {'all_result': res["results"]["bindings"]})
 
-            form = MovieForm()
-            return render(request, 'search.html', {'form': form, 'all_result': res["results"]["bindings"]})
-
+def movie_search(request):
+    if request.method == 'POST':            
         form = MovieForm(request.POST)
         if form.is_valid():
             movie_name = form.cleaned_data['movie_name']
@@ -68,7 +64,6 @@ def movie_search(request):
             res = json.loads(res)
 
             return render(request, 'search.html', {'form': form, 'search_result': res["results"]["bindings"]})
-    
 
     form = MovieForm()
     return render(request, 'search.html', {'form': form})
