@@ -18,7 +18,7 @@ In command line:
 ## GraphDB database
 
 - Download GraphDB [here](https://www.ontotext.com/products/graphdb/download/)
-- In GraphDB panel, got to "Setup -> Repositories -> Create New Repository", and create a new repository.
+- In GraphDB panel, got to "Setup -> Repositories -> Create New Repository" and create a new repository, naming it "MoviePedia".
 - In GraphDB panel, got to "Import -> Upload RDF Files" and upload the file netfli_titles.nt, in the "Data" folder, and click the "import" button.
 
 ## Run server

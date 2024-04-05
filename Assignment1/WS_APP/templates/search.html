@@ -32,12 +32,12 @@
       <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">{{ entry.title.value }}</h5>
-          <p class="card-text"><strong>Cast:</strong> {{ entry.cast.value }}</p>
+          <p class="card-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
           <p class="card-text">
-            <strong>Release:</strong> {{ entry.release.value }}
+            <strong>Release:</strong> {{ entry.release_year.value }}
           </p>
           <p class="card-text">
-            <strong>Genres:</strong> {{ entry.genres.value }}
+            <strong>Genres:</strong> {{ entry.mergedGenres.value }}
           </p>
           <p class="card-text">
             <strong>Director:</strong> {{ entry.director.value }}
@@ -71,9 +71,9 @@
     <div class="card flex-grow-1">
       <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
-        <p class="card-text card-break toggle-text"><strong>Cast:</strong> {{ entry.cast.value }}</p>
-        <p class="card-text card-break toggle-text"><strong>Release:</strong> {{ entry.release.value }}</p>
-        <p class="card-text card-break toggle-text"><strong>Genres:</strong> {{ entry.genres.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Release:</strong> {{ entry.release_year.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Genres:</strong> {{ entry.mergedGenres.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Director:</strong> {{ entry.director.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Country:</strong> {{ entry.country.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
