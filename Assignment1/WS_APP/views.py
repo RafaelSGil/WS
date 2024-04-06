@@ -44,11 +44,13 @@ def search(request):
     between_dates_form = BetweenDatesForm()
     date_form = DateForm()
     genres_form = GenresForm()
+    director_form = DirectorForm()
     movie_search_results = None
     cast_search_results = None
     between_dates_search_results = None
     date_results = None
     genres_results = None
+    director_results = None
 
     if request.method == 'POST':
         if "movie_search" in request.POST:
@@ -87,20 +89,32 @@ def search(request):
                 genres_results = genres_search(genres)
                 num_results = len(genres_results)
 
+        if "director_search" in request.POST:
+            director_form = DirectorForm(request.POST)
+            if director_form.is_valid():
+                director = director_form.cleaned_data['director']
+                director_results = search_director(director)
+                num_results = len(director_results)
+
         return render(request, 'search.html', 
                       {'movie_form': movie_form, 
                        'cast_form': cast_form, 
                        'between_dates_form': between_dates_form,
                         'date_form': date_form,
                         'genres_form': genres_form,
+                        'director_form': director_form,
                        'movie_results': movie_search_results, 
                        'cast_results': cast_search_results,
                        'between_dates_results': between_dates_search_results,
                        'date_results': date_results,
                        'genres_results': genres_results,
+                       'director_results': director_results, 
                        'num_results': num_results})
 
-    return render(request, 'search.html', {'movie_form': movie_form, 'cast_form': cast_form, 'between_dates_form': between_dates_form, 'date_form': date_form, 'genres_form': genres_form})
+    return render(request, 'search.html', {'movie_form': movie_form, 'cast_form': cast_form, 
+                                           'between_dates_form': between_dates_form,
+                                             'date_form': date_form, 'genres_form': genres_form,
+                                             'director_form': director_form})
 
 def movie_search(movie_name):
     query = """
@@ -388,10 +402,62 @@ def genres_search(genres):
                     """
 
     payload_query = { "query": query }
-    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
+    res = json.loads(res)
+
+    return res['results']['bindings']
+
+def search_director(director_name):
+    query = """
+            PREFIX net: <http://ws.org/netflix_info/pred/>
+
+            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts) ?country ?date_added ?release_year ?rating ?duration (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+            WHERE {
+                ?dir_code net:real_name "_director_name" .
+                ?show_id net:director ?dir_code .
+                
+                ?show_id net:type ?type_code .
+                ?type_code net:real_name ?type .
+                
+                ?show_id net:title ?title_code .
+                ?title_code net:real_name ?title .
+                
+                ?show_id net:director ?director_code .
+                ?director_code net:real_name ?director .
+                
+                OPTIONAL {
+                    ?show_id net:cast ?cast_code .
+                    ?cast_code net:real_name ?cast .
+                }
+                
+                ?show_id net:country ?country_code .
+                ?country_code net:real_name ?country .
+                
+                ?show_id net:date_added ?date_code .
+                ?date_code net:real_name ?date_added .
+                
+                ?show_id net:release_year ?release_code .
+                ?release_code net:real_name ?release_year .
+                
+                ?show_id net:rating ?rating_code .
+                ?rating_code net:real_name ?rating .
+                
+                ?show_id net:duration ?duration_code .
+                ?duration_code net:real_name ?duration .
+                
+                ?show_id net:listed_in ?genres_code .
+                ?genres_code net:real_name ?genres .
+                
+                ?show_id net:description ?desc_code .
+                ?desc_code net:real_name ?description .
+            }
+            GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
+            """
     
-    print("RES: " + res)
+    query = query.replace("_director_name", director_name)
     
+    payload_query = { "query": query }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
     res = json.loads(res)
 
     return res['results']['bindings']
