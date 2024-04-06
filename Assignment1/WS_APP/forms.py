@@ -25,3 +25,6 @@ class BetweenDatesForm(forms.Form):
 
 class DateForm(forms.Form):
     date = forms.IntegerField(label="Year")
+
+class GenresForm(forms.Form):
+    genres = forms.CharField(label="Genres (1+ separated by comma)")

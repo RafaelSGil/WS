@@ -40,6 +40,15 @@
         </button>
       </form>
     </div>
+    <div class="col-md-4">
+      <h4 class="mb-3">Search for movies based on genres</h3>
+      <form method="POST">
+        {% csrf_token %} {{ genres_form.as_p }}
+        <button type="submit" class="btn btn-primary mb-3" name="genres_search">
+          Search
+        </button>
+      </form>
+    </div>
   </div>
 
   {% if movie_results %}
@@ -83,7 +92,8 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
 
-  <h1 class="mt-5 mb-3">Movies Information - search by cast</h1>
+  <h1 class="mt-5 mb-1">Movies Information - search by cast</h1>
+  <span class="mb-3">{{num_results}} results</span>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in cast_results %}
     <div class="card flex-grow-1">
@@ -109,7 +119,8 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
 
-  <h1 class="mt-5 mb-3">Movies Information - search by dates gap</h1>
+  <h1 class="mt-5 mb-1">Movies Information - search by dates gap</h1>
+  <span class="mb-3">{{num_results}} results</span>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in between_dates_results %}
     <div class="card flex-grow-1">
@@ -134,9 +145,37 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
 
-  <h1 class="mt-5 mb-3">Movies Information - search by specific date</h1>
+  <h1 class="mt-5 mb-1">Movies Information - search by specific date</h1>
+  <span class="mb-3">{{num_results}} results</span>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in date_results %}
+    <div class="card flex-grow-1">
+      <div class="card-body">
+        <h5 class="card-title card-break">{{ entry.title.value }}</h5>
+        <p class="card-text card-break toggle-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Release:</strong> {{ entry.release_year.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Genres:</strong> {{ entry.mergedGenres.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Director:</strong> {{ entry.director.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Country:</strong> {{ entry.country.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
+        <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
+      </div>
+    </div>
+    {% endfor %}
+</div>
+
+  {% endif %}
+
+
+  {% if genres_results %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+
+  <h1 class="mt-5 mb-1">Movies Information - search by specific genre(s)</h1>
+  <span class="mb-3">{{num_results}} results</span>
+  <div class="container-card" onwheel="horizontalScroll(event)">
+    {% for entry in genres_results %}
     <div class="card flex-grow-1">
       <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
