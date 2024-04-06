@@ -5,7 +5,7 @@ class MovieForm(forms.Form):
     movie_name = forms.CharField(label='Movie Name', max_length=100)
 
 class CastForm(forms.Form):
-    cast_name = forms.CharField(label='Movie Cast')
+    cast_name = forms.CharField(label='Actor Name')
 
 class BetweenDatesForm(forms.Form):
     date1 = forms.IntegerField(label='From year')
@@ -28,3 +28,6 @@ class DateForm(forms.Form):
 
 class GenresForm(forms.Form):
     genres = forms.CharField(label="Genres (1+ separated by comma)")
+
+class DirectorForm(forms.Form):
+    director = forms.CharField(label="Director Name")
