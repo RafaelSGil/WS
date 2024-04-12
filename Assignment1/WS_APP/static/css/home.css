@@ -20,3 +20,17 @@
 .card-break {
   white-space: break-spaces;
 }
+
+
+
+.search-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-bar {
+  width: 50%;
+}

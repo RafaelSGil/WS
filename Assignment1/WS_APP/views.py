@@ -15,27 +15,66 @@ client = ApiClient(endpoint=endpoint)
 accessor = GraphDBApi(client)
 
 
+
 def home(request):
-    """Renders the home page."""
-    assert isinstance(request, HttpRequest)
+    form = SearchForm()
+    results = None
+    search_performed = False
 
-    query = """
-                        PREFIX netflix: <http://ws.org/netflix_info/pred/>
-
-                        SELECT ?movies ?description
-                        WHERE {
-                            ?fa netflix:title ?movies_code .
-                            ?movies_code netflix:real_name ?movies .
-                            ?fa netflix:description ?description_code .
-                            ?description_code netflix:real_name ?description .
-                        }
-                    """
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            search_performed = True
+            query = form.cleaned_data['search_query']
+            results = unified_search(query)
             
-    payload_query = { "query": query }
-    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
-    res = json.loads(res)
     
-    return render(request, 'home.html', {'all_result': res["results"]["bindings"]})
+    if not results:
+        query = """
+            PREFIX netflix: <http://ws.org/netflix_info/pred/>
+            SELECT ?movies ?description WHERE {
+                ?fa netflix:title ?movies_code .
+                ?movies_code netflix:real_name ?movies .
+                ?fa netflix:description ?description_code .
+                ?description_code netflix:real_name ?description .
+            }
+        """
+        payload_query = {"query": query}
+        res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+        res = json.loads(res)
+        all_result = res["results"]["bindings"]
+    else:
+        all_result = None
+    
+    return render(request, 'home.html', {'form': form, 'results': results, 'all_result': all_result, 'search_performed': search_performed})
+
+
+
+
+def unified_search(query):
+    
+    genres = fetch_genres(accessor, repo_name)
+    directors = fetch_directors(accessor, repo_name)
+    actors = fetch_actors(accessor, repo_name)
+
+
+    if query in directors:
+        print("DIRECTOR")
+        return search_director(query)
+        
+    elif query in genres:
+        print("GENRE")
+        return genres_search(query)
+    
+    elif query in actors:
+        print("ACTOR")
+        return cast_search(query)
+
+    else:
+        print("MOVIE")
+        return movie_search(query)
+
+
 
 def search(request):
     num_results = 0
@@ -461,3 +500,53 @@ def search_director(director_name):
     res = json.loads(res)
 
     return res['results']['bindings']
+
+
+
+
+
+
+
+#Fetch Data from Database
+
+def fetch_directors(accessor, repo_name):
+    query = """
+    PREFIX net: <http://ws.org/netflix_info/pred/>
+    SELECT DISTINCT ?director WHERE {
+        ?show_id net:director ?director_code .
+        ?director_code net:real_name ?director .
+    }
+    """
+    payload_query = {"query": query}
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    directors = json.loads(res)
+    director_list = [director['director']['value'] for director in directors['results']['bindings']]
+    return director_list
+
+def fetch_actors(accessor, repo_name):
+    query = """
+    PREFIX net: <http://ws.org/netflix_info/pred/>
+    SELECT DISTINCT ?actor WHERE {
+        ?show_id net:cast ?cast_code .
+        ?cast_code net:real_name ?actor .
+    }
+    """
+    payload_query = {"query": query}
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    actors = json.loads(res)
+    actor_list = [actor['actor']['value'] for actor in actors['results']['bindings']]
+    return actor_list
+
+def fetch_genres(accessor, repo_name):
+    query = """
+    PREFIX net: <http://ws.org/netflix_info/pred/>
+    SELECT DISTINCT ?genre WHERE {
+        ?show_id net:listed_in ?genre_code .
+        ?genre_code net:real_name ?genre .
+    }
+    """
+    payload_query = {"query": query}
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    genres = json.loads(res)
+    genre_list = [genre['genre']['value'] for genre in genres['results']['bindings']]
+    return genre_list

@@ -31,3 +31,16 @@ class GenresForm(forms.Form):
 
 class DirectorForm(forms.Form):
     director = forms.CharField(label="Director Name")
+
+
+class CombinedSearchForm(forms.Form):
+    search_type = forms.ChoiceField(choices=[
+        ('title', 'Movie Title'),
+        ('actor', 'Actor'),
+        ('genre', 'Genre'),
+        ('director', 'Director')
+    ], label="Search Type")
+    search_query = forms.CharField(label='Search Query', max_length=100)
+
+class SearchForm(forms.Form):
+    search_query = forms.CharField(label='Search', max_length=100)

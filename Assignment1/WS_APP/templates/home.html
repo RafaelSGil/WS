@@ -1,26 +1,59 @@
-{% extends 'layout.html' %} {% block content %}
+{% extends 'layout.html' %}
 
+{% block content %}
 <div class="container mt-5">
   <h1>Welcome to MoviePedia</h1>
   <p>Discover and explore your favorite movies with MoviePedia!</p>
 
-  <br />
-  <br />
-  {% if all_result %} {% load static %}
-  <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Search</button>
+  </form>
 
-  <h3>Every movie available</h3>
-
-  <div class="container-card" onwheel="horizontalScroll(event)">
-    {% for entry in all_result %}
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title card-break">{{ entry.movies.value }}</h5>
-        <p class="card-text card-break">{{ entry.description.value }}</p>
+  {% if results %}
+      <h2>Search Results:</h2>
+      <div class="container-card" onwheel="horizontalScroll(event)">
+        {% for entry in results %}
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title card-break">{{ entry.title.value }}</h3>
+                <br>
+            <p class="card-text card-break toggle-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Release:</strong> {{ entry.release_year.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Genres:</strong> {{ entry.mergedGenres.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Director:</strong> {{ entry.director.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Country:</strong> {{ entry.country.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
+            <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
+              </div>
+            </div>
+          {% endfor %}
       </div>
-    </div>
-    {% endfor %}
-  </div>
+      
+  {% elif search_performed %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <li></li>
+      <h3>No results found... Here's every movie available</h3>
+      <div class="container-card" onwheel="horizontalScroll(event)">
+          {% for results in all_result %}
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title card-break">{{ results.movies.value }}</h5>
+                <p class="card-text card-break">{{ results.description.value }}</p>
+              </div>
+            </div>
+          {% endfor %}
+      </div>
+  {% endif %}
 </div>
+{% endblock %}
 
-{% endif %} {% endblock %}
+
+
+
+
+
+
