@@ -1,3 +1,4 @@
+from urllib.parse import quote
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 
@@ -49,6 +50,34 @@ def home(request):
     return render(request, 'home.html', {'form': form, 'results': results, 'all_result': all_result, 'search_performed': search_performed})
 
 
+def delete(request):
+    delete_form = DeleteForm()
+    if request.method == 'POST':
+        if 'delete' in request.POST:
+            delete_form = DeleteForm(request.POST)
+            if delete_form.is_valid():
+                value = delete_form.cleaned_data['delete']
+
+                query = """
+                            PREFIX pred: <http://ws.org/netflix_info/pred/>
+                            PREFIX net: <http://ws.org/netflix_info/>
+
+                            DELETE DATA {
+                                net:_encoded pred:real_name "_value" .
+                            }
+                        """
+        
+                encoded_value = value.replace(' ', '_')
+                encoded_value = quote(value, safe='')
+
+                query = query.replace("_encoded", encoded_value)
+                query = query.replace("_value", value)
+
+                payload_query = { "query": query }
+                res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
+                res = json.loads(res)
+
+    return render(request, 'delete.html', {'delete_form': delete_form})
 
 
 def unified_search(query):
@@ -155,6 +184,81 @@ def search(request):
                                              'date_form': date_form, 'genres_form': genres_form,
                                              'director_form': director_form})
 
+def search_alternative(request):
+    num_results = 0
+    movie_form = MovieForm()
+    cast_form = CastForm()
+    between_dates_form = BetweenDatesForm()
+    date_form = DateForm()
+    genres_form = GenresForm()
+    director_form = DirectorForm()
+    cast_search_results = None
+    date_results = None
+    genres_results = None
+    director_results = None
+
+    if request.method == 'POST':
+        if "cast_search" in request.POST:
+            cast_search_results = cast_search(request.POST.get('cast_search'))
+            num_results = len(cast_search_results)
+                
+        
+        if "date_search" in request.POST:
+            date_results = date_search(request.POST.get('date_search'))
+            num_results = len(date_results)
+
+        if "genre_search" in request.POST:
+            genres_results = genres_search(request.POST.get('genre_search'))
+            num_results = len(genres_results)
+
+        if "director_search" in request.POST:
+            director_results = search_director(request.POST.get('director_search'))
+            num_results = len(director_results)
+
+        return render(request, 'search.html', 
+                      {'movie_form': movie_form, 
+                       'cast_form': cast_form, 
+                       'between_dates_form': between_dates_form,
+                        'date_form': date_form,
+                        'genres_form': genres_form,
+                        'director_form': director_form,
+                       'cast_results': cast_search_results,
+                       'date_results': date_results,
+                       'genres_results': genres_results,
+                       'director_results': director_results, 
+                       'num_results': num_results})
+
+    return render(request, 'search.html', {'movie_form': movie_form, 'cast_form': cast_form, 
+                                           'between_dates_form': between_dates_form,
+                                             'date_form': date_form, 'genres_form': genres_form,
+                                             'director_form': director_form})
+
+def transform_json(json_data):
+    if not json_data:
+        return json_data
+
+    for obj in json_data:
+        merged_casts = obj.get('mergedCasts', {}).get('value', '')
+        if not merged_casts:
+            continue
+
+        cast_list = merged_casts.split(', ')
+        cast_values = {index + 1: cast for index, cast in enumerate(cast_list)}
+
+        obj['mergedCasts'] = {'type': 'literal', 'values': cast_values}
+
+        merged_genres = obj.get('mergedGenres', {}).get('value', '')
+        if not merged_genres:
+            continue
+
+        genres_list = merged_genres.split(', ')
+        genres_values = {index + 1: genre for index, genre in enumerate(genres_list)}
+
+        obj['mergedGenres'] = {'type': 'literal', 'values': genres_values}
+
+    return json_data
+
+
 def movie_search(movie_name):
     query = """
                 PREFIX net: <http://ws.org/netflix_info/pred/>
@@ -210,7 +314,11 @@ def movie_search(movie_name):
     payload_query = { "query": query }
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
     res = json.loads(res)
-    return res['results']['bindings']
+
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
+
 
 def cast_search(cast_name):
     query = """
@@ -264,7 +372,14 @@ def cast_search(cast_name):
     payload_query = { "query": query }
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
     res = json.loads(res)
-    return res['results']['bindings']
+
+    mod_js =  transform_json(res['results']['bindings'])
+
+    print("CAST: ")
+    print(mod_js)
+
+    return mod_js
+
 
 def between_dates_search(date1, date2):
     query = """
@@ -378,6 +493,7 @@ def date_search(date):
     return res['results']['bindings']
 
 def genres_search(genres):
+    print("GENRE: " + genres)
     genres_split = [genre.strip() for genre in genres.split(',')]
 
     query = """
@@ -502,11 +618,6 @@ def search_director(director_name):
     return res['results']['bindings']
 
 
-
-
-
-
-
 #Fetch Data from Database
 
 def fetch_directors(accessor, repo_name):
@@ -550,3 +661,4 @@ def fetch_genres(accessor, repo_name):
     genres = json.loads(res)
     genre_list = [genre['genre']['value'] for genre in genres['results']['bindings']]
     return genre_list
+    

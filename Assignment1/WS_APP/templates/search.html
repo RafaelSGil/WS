@@ -6,7 +6,7 @@
   <div class="row">
     <div class="col-md-4">
       <h4 class="mb-3">Search for a specific movie</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ movie_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="movie_search">
           Search
@@ -15,7 +15,7 @@
     </div>
     <div class="col-md-4">
       <h4 class="mb-3">Search for a specific cast member</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ cast_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="cast_search">
           Search
@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-4">
       <h4 class="mb-3">Search for a specific director</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ director_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="director_search">
           Search
@@ -33,7 +33,7 @@
     </div>
     <div class="col-md-4">
       <h4 class="mb-3">Search for movies between dates</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ between_dates_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="between_dates_search">
           Search
@@ -42,7 +42,7 @@
     </div>
     <div class="col-md-4">
       <h4 class="mb-3">Search for movies release in a given year</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ date_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="date_search">
           Search
@@ -51,7 +51,7 @@
     </div>
     <div class="col-md-4">
       <h4 class="mb-3">Search for movies based on genres</h3>
-      <form method="POST">
+      <form action="{% url 'search' %}" method="POST">
         {% csrf_token %} {{ genres_form.as_p }}
         <button type="submit" class="btn btn-primary mb-3" name="genres_search">
           Search
@@ -61,6 +61,9 @@
   </div>
 
   {% if movie_results %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+
   <h1 class="mt-5 mb-3">Movie Information</h1>
   <div class="row">
     {% for entry in movie_results %}
@@ -68,16 +71,43 @@
       <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">{{ entry.title.value }}</h5>
-          <p class="card-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
-          <p class="card-text">
-            <strong>Release:</strong> {{ entry.release_year.value }}
-          </p>
-          <p class="card-text">
-            <strong>Genres:</strong> {{ entry.mergedGenres.value }}
-          </p>
-          <p class="card-text">
-            <strong>Director:</strong> {{ entry.director.value }}
-          </p>
+          
+          <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+            <p class="card-text"><strong>Cast:</strong> 
+              {% csrf_token %}
+              {% for index, cast in entry.mergedCasts.values.items %}
+              <button type="submit" class="button_text" name="cast_search" value="{{ cast }}">{{ cast }}</button>
+                {% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </p>
+          </form>
+          
+          <form action="{% url 'search_alternative' %}" class="mb-3" method="post">
+            {% csrf_token %}
+            <p class="card-text">
+              <strong>Release:</strong>
+              <button type="submit" class="button_text" name="date_search" value="{{ entry.release_year.value }}">{{ entry.release_year.value }}</button>
+            </p>
+          </form>
+
+          <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+              <p class="card-text"><strong>Genres:</strong> 
+                {% for index, genre in entry.mergedGenres.values.items %}
+                  <button type="submit" class="button_text" name="genre_search" value="{{ genre }}">{{ genre }}</button>
+                  {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              </p>
+          </form>
+
+          <form action="{% url 'search_alternative' %}" class="mb-3" method="post">
+            {% csrf_token %}
+            <p class="card-text">
+              <strong>Director:</strong>
+              <button type="submit" class="button_text" name="director_search" value="{{ entry.director.value }}">{{ entry.director.value }}</button>
+            </p>
+          </form>
+          
           <p class="card-text">
             <strong>Country:</strong> {{ entry.country.value }}
           </p>
@@ -100,17 +130,32 @@
   {% if cast_results %}
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
 
   <h1 class="mt-5 mb-1">Movies Information - search by cast</h1>
-  <span class="mb-3">{{num_results}} results</span>
+  <span class="mb-3">{{ num_results }} results</span>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in cast_results %}
     <div class="card flex-grow-1">
       <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
-        <p class="card-text card-break toggle-text"><strong>Cast:</strong> {{ entry.mergedCasts.value }}</p>
+        <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+            <p class="card-text toggle-text"><strong>Cast:</strong> 
+              {% csrf_token %}
+              {% for index, cast in entry.mergedCasts.values.items %}
+              <button type="submit" class="button_text" name="cast_search" value="{{ cast }}">{{ cast }}</button>{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </p>
+          </form>
         <p class="card-text card-break toggle-text"><strong>Release:</strong> {{ entry.release_year.value }}</p>
-        <p class="card-text card-break toggle-text"><strong>Genres:</strong> {{ entry.mergedGenres.value }}</p>
+        <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+          <p class="card-text toggle-text"><strong>Cast:</strong> 
+            {% csrf_token %}
+            {% for index, genre in entry.mergedGenres.values.items %}
+            <button type="submit" class="button_text" name="genre_search" value="{{ genre }}">{{ genre }}</button>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+          </p>
+        </form>
         <p class="card-text card-break toggle-text"><strong>Director:</strong> {{ entry.director.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Country:</strong> {{ entry.country.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
@@ -119,9 +164,9 @@
       </div>
     </div>
     {% endfor %}
-</div>
+  </div>
+{% endif %}
 
-  {% endif %}
 
 
   {% if between_dates_results %}
