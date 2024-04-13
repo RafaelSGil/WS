@@ -19,36 +19,47 @@ accessor = GraphDBApi(client)
 
 def home(request):
     form = SearchForm()
+    between_dates_form = BetweenDatesForm()
+    date_form = DateForm()
     results = None
+    all_result = None
     search_performed = False
 
     if request.method == 'POST':
-        form = SearchForm(request.POST)
-        if form.is_valid():
-            search_performed = True
-            query = form.cleaned_data['search_query']
-            results = unified_search(query)
-            
-    
-    if not results:
-        query = """
-            PREFIX netflix: <http://ws.org/netflix_info/pred/>
-            SELECT ?movies ?description WHERE {
-                ?fa netflix:title ?movies_code .
-                ?movies_code netflix:real_name ?movies .
-                ?fa netflix:description ?description_code .
-                ?description_code netflix:real_name ?description .
-            }
-        """
-        payload_query = {"query": query}
-        res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
-        res = json.loads(res)
-        all_result = res["results"]["bindings"]
-    else:
-        all_result = None
-    
-    return render(request, 'home.html', {'form': form, 'results': results, 'all_result': all_result, 'search_performed': search_performed})
+        # Determine which form is being submitted
+        if 'movie_search' in request.POST:
+            form = SearchForm(request.POST)
+            if form.is_valid():
+                query = form.cleaned_data['search_query']
+                results = unified_search(query)
+                search_performed = True
+        elif 'between_dates_search' in request.POST:
+            between_dates_form = BetweenDatesForm(request.POST)
+            if between_dates_form.is_valid():
+                date1 = between_dates_form.cleaned_data['date1']
+                date2 = between_dates_form.cleaned_data['date2']
+                results = between_dates_search(date1, date2)
+                search_performed = True
+        elif 'date_search' in request.POST:
+            date_form = DateForm(request.POST)
+            if date_form.is_valid():
+                date = date_form.cleaned_data['date']
+                results = date_search(date)
+                search_performed = True
 
+        if not results:
+            all_result = fetch_all_movies()
+
+        print(results)
+    context = {
+        'form': form,
+        'all_result': all_result,
+        'between_dates_form': between_dates_form,
+        'date_form': date_form,
+        'results': results,
+        'search_performed': search_performed,
+    }
+    return render(request, 'home.html', context)
 
 def delete(request):
     success = None
@@ -748,4 +759,17 @@ def fetch_genres(accessor, repo_name):
     genres = json.loads(res)
     genre_list = [genre['genre']['value'] for genre in genres['results']['bindings']]
     return genre_list
-    
+
+def fetch_all_movies():
+    query = """
+            PREFIX netflix: <http://ws.org/netflix_info/pred/>
+            SELECT ?movies ?description WHERE {
+                ?fa netflix:title ?movies_code .
+                ?movies_code netflix:real_name ?movies .
+                ?fa netflix:description ?description_code .
+                ?description_code netflix:real_name ?description .
+            }
+        """
+    payload_query = {"query": query}
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
+    return json.loads(res)["results"]["bindings"]
