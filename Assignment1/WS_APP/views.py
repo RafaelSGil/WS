@@ -119,49 +119,51 @@ def search(request):
     date_results = None
     genres_results = None
     director_results = None
+    prompt = None
+    prompt2 = None
 
     if request.method == 'POST':
         if "movie_search" in request.POST:
             movie_form = MovieForm(request.POST)
             if movie_form.is_valid():
-                movie_name = movie_form.cleaned_data['movie_name']
-                movie_search_results = movie_search(movie_name)
+                prompt = movie_form.cleaned_data['movie_name']
+                movie_search_results = movie_search(prompt)
                 num_results = len(movie_search_results)
         
         if "cast_search" in request.POST:
             cast_form = CastForm(request.POST)
             if cast_form.is_valid():
-                cast_name = cast_form.cleaned_data['cast_name']
-                cast_search_results = cast_search(cast_name)
+                prompt = cast_form.cleaned_data['cast_name']
+                cast_search_results = cast_search(prompt)
                 num_results = len(cast_search_results)
 
         if "between_dates_search" in request.POST:
             between_dates_form = BetweenDatesForm(request.POST)
             if between_dates_form.is_valid():
-                date1 = between_dates_form.cleaned_data['date1']
-                date2 = between_dates_form.cleaned_data['date2']
-                between_dates_search_results = between_dates_search(date1, date2)
+                prompt = between_dates_form.cleaned_data['date1']
+                prompt2 = between_dates_form.cleaned_data['date2']
+                between_dates_search_results = between_dates_search(prompt, prompt2)
                 num_results = len(between_dates_search_results)
 
         if "date_search" in request.POST:
             date_form = DateForm(request.POST)
             if date_form.is_valid():
-                date = date_form.cleaned_data['date']
-                date_results = date_search(date)
+                prompt = date_form.cleaned_data['date']
+                date_results = date_search(prompt)
                 num_results = len(date_results)
 
         if "genres_search" in request.POST:
             genres_form = GenresForm(request.POST)
             if genres_form.is_valid():
-                genres = genres_form.cleaned_data['genres']
-                genres_results = genres_search(genres)
+                prompt = genres_form.cleaned_data['genres']
+                genres_results = genres_search(prompt)
                 num_results = len(genres_results)
 
         if "director_search" in request.POST:
             director_form = DirectorForm(request.POST)
             if director_form.is_valid():
-                director = director_form.cleaned_data['director']
-                director_results = search_director(director)
+                prompt = director_form.cleaned_data['director']
+                director_results = search_director(prompt)
                 num_results = len(director_results)
 
         return render(request, 'search.html', 
@@ -177,7 +179,9 @@ def search(request):
                        'date_results': date_results,
                        'genres_results': genres_results,
                        'director_results': director_results, 
-                       'num_results': num_results})
+                       'num_results': num_results,
+                       'prompt': prompt,
+                       'prompt2': prompt2})
 
     return render(request, 'search.html', {'movie_form': movie_form, 'cast_form': cast_form, 
                                            'between_dates_form': between_dates_form,
@@ -196,23 +200,28 @@ def search_alternative(request):
     date_results = None
     genres_results = None
     director_results = None
+    prompt = None
 
     if request.method == 'POST':
         if "cast_search" in request.POST:
-            cast_search_results = cast_search(request.POST.get('cast_search'))
+            prompt = request.POST.get('cast_search')
+            cast_search_results = cast_search(prompt)
             num_results = len(cast_search_results)
                 
         
         if "date_search" in request.POST:
-            date_results = date_search(request.POST.get('date_search'))
+            prompt = request.POST.get('date_search')
+            date_results = date_search(prompt)
             num_results = len(date_results)
 
         if "genre_search" in request.POST:
-            genres_results = genres_search(request.POST.get('genre_search'))
+            prompt = request.POST.get('genre_search')
+            genres_results = genres_search(prompt)
             num_results = len(genres_results)
 
         if "director_search" in request.POST:
-            director_results = search_director(request.POST.get('director_search'))
+            prompt = request.POST.get('director_search')
+            director_results = search_director(prompt)
             num_results = len(director_results)
 
         return render(request, 'search.html', 
@@ -226,7 +235,8 @@ def search_alternative(request):
                        'date_results': date_results,
                        'genres_results': genres_results,
                        'director_results': director_results, 
-                       'num_results': num_results})
+                       'num_results': num_results,
+                       'prompt': prompt})
 
     return render(request, 'search.html', {'movie_form': movie_form, 'cast_form': cast_form, 
                                            'between_dates_form': between_dates_form,
@@ -434,7 +444,10 @@ def between_dates_search(date1, date2):
     payload_query = { "query": query }
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
     res = json.loads(res)
-    return res['results']['bindings']
+
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
 
 def date_search(date):
     query = """
@@ -490,7 +503,9 @@ def date_search(date):
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
     res = json.loads(res)
 
-    return res['results']['bindings']
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
 
 def genres_search(genres):
     print("GENRE: " + genres)
@@ -560,7 +575,9 @@ def genres_search(genres):
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
     res = json.loads(res)
 
-    return res['results']['bindings']
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
 
 def search_director(director_name):
     query = """
@@ -615,7 +632,9 @@ def search_director(director_name):
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
     res = json.loads(res)
 
-    return res['results']['bindings']
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
 
 
 #Fetch Data from Database
