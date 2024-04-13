@@ -51,6 +51,9 @@ def home(request):
             all_result = fetch_all_movies()
 
         print(results)
+
+    search_grid_res = search_grid()
+
     context = {
         'form': form,
         'all_result': all_result,
@@ -58,8 +61,28 @@ def home(request):
         'date_form': date_form,
         'results': results,
         'search_performed': search_performed,
+        'search_grid': search_grid_res,
     }
     return render(request, 'home.html', context)
+
+def search_grid():
+    query_top_genres = """
+                            PREFIX net: <http://ws.org/netflix_info/pred/>
+
+                            SELECT ?genres (COUNT(?genres) as ?count)
+                            WHERE {
+                                ?movie net:listed_in ?genres_code .
+                                ?genres_code net:real_name ?genres .
+                            }
+                            GROUP BY ?genres
+                            ORDER BY DESC(?count)
+                            LIMIT 4
+                        """
+    
+    payload_query = { "query": query_top_genres }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
+    return json.loads(res)['results']['bindings']
+
 
 def delete(request):
     success = None
