@@ -70,7 +70,6 @@ def delete(request):
 
             query = query.replace("_encoded", encoded_value)
             query = query.replace("_value", value)
-            print("QUERY: " + query)
             payload_query = { "update": query }
             res = accessor.sparql_update(body=payload_query, repo_name=repo_name)  
             
@@ -91,6 +90,52 @@ def delete(request):
             success = json.loads(success)
             print("SUCCESS: ", success["boolean"])
             return render(request, 'delete.html', {'success': success})
+        
+        if "delete_entire_genre" in request.POST:
+            value = request.POST.get("delete_value")
+
+            query = """
+                        PREFIX net: <http://ws.org/netflix_info/pred/>
+
+                        DELETE {
+                        ?show_id ?p ?o .
+                        }
+                        WHERE {
+                        ?genres_code net:real_name "_value" .
+                        ?show_id net:listed_in ?genres_code .
+                        
+                        ?show_id ?p ?o .
+                        }
+                    """
+            
+            query = query.replace("_value", value)
+            payload_query = { "update": query }
+            accessor.sparql_update(body=payload_query, repo_name=repo_name)  
+            
+            query = """
+                        PREFIX net: <http://ws.org/netflix_info/pred/>
+
+                        ASK
+                        WHERE {
+                        {
+                            SELECT (COUNT(?genres) AS ?count)
+                            WHERE {
+                            ?movie net:listed_in ?genres_code .
+                            ?genres_code net:real_name ?genres .
+                            FILTER (?genres = "_value")
+                            }
+                            GROUP BY ?genres
+                        }
+                        FILTER (?count > 0)
+                        }
+                    """    
+            
+            query = query.replace("_value", value)
+
+            payload_query = { "query": query }
+            success = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
+            success = json.loads(success)
+            return render(request, 'delete.html', {'success2': success})
 
     return render(request, 'delete.html')
 
