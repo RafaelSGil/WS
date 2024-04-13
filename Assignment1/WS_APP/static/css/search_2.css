@@ -1,0 +1,11 @@
+.button_text {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+  /* Additional styling as needed */
+  color: inherit;
+}

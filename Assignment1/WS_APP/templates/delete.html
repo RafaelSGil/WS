@@ -1,0 +1,60 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container mt-2 mb-10">
+  <h1>Delete data...</h1>
+  <p>Insert a name to delete it from the database</p>
+  <br />
+  <form action="{% url 'delete' %}" method="post" class="input-group">
+    {% csrf_token %}
+    <input
+      type="search"
+      class="form-control rounded"
+      placeholder="Delete data..."
+      aria-label="Search"
+      aria-describedby="search-addon"
+      name="delete_value"
+    />
+    <button type="submit" class="btn btn-outline-danger" name="delete_data">
+      delete
+    </button>
+  </form>
+  <br />
+
+  {% if success %} {% if success.boolean == False %}
+  <h3 class="text-success">Successfully deleted data</h3>
+  {% else %}
+  <h3 class="text-danger">Failed to delete data</h3>
+  {% endif %} {% endif %}
+  <br /><br /><br /><br />
+  <h1>Delete an entire genre...</h1>
+  <p>
+    Insert a genre to delete it from the database, including every movie
+    belonging to it
+  </p>
+  <br />
+  <form action="{% url 'delete' %}" method="post" class="input-group">
+    {% csrf_token %}
+    <input
+      type="search"
+      class="form-control rounded"
+      placeholder="Delete data..."
+      aria-label="Search"
+      aria-describedby="search-addon"
+      name="delete_value"
+    />
+    <button
+      type="submit"
+      class="btn btn-outline-danger"
+      name="delete_entire_genre"
+    >
+      delete
+    </button>
+  </form>
+  <br />
+
+  {% if success2 %} {% if success2.boolean == False %}
+  <h3 class="text-success">Successfully deleted data</h3>
+  {% else %}
+  <h3 class="text-danger">Failed to delete data</h3>
+  {% endif %} {% endif %}
+</div>
+{% endblock %}
