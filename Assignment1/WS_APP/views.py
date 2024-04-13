@@ -51,14 +51,12 @@ def home(request):
 
 
 def delete(request):
-    delete_form = DeleteForm()
+    success = None
     if request.method == 'POST':
-        if 'delete' in request.POST:
-            delete_form = DeleteForm(request.POST)
-            if delete_form.is_valid():
-                value = delete_form.cleaned_data['delete']
+        if "delete_data" in request.POST:
+            value = request.POST.get("delete_value")
 
-                query = """
+            query = """
                             PREFIX pred: <http://ws.org/netflix_info/pred/>
                             PREFIX net: <http://ws.org/netflix_info/>
 
@@ -67,17 +65,34 @@ def delete(request):
                             }
                         """
         
-                encoded_value = value.replace(' ', '_')
-                encoded_value = quote(value, safe='')
+            encoded_value = value.replace(' ', '_')
+            encoded_value = quote(encoded_value, safe='')
 
-                query = query.replace("_encoded", encoded_value)
-                query = query.replace("_value", value)
+            query = query.replace("_encoded", encoded_value)
+            query = query.replace("_value", value)
+            print("QUERY: " + query)
+            payload_query = { "update": query }
+            res = accessor.sparql_update(body=payload_query, repo_name=repo_name)  
+            
+            query = """
+                            PREFIX pred: <http://ws.org/netflix_info/pred/>
+                            PREFIX net: <http://ws.org/netflix_info/>
 
-                payload_query = { "query": query }
-                res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
-                res = json.loads(res)
+                            ASK {
+                                net:_encoded pred:real_name "_value" .
+                            }
+                        """
+            
+            query = query.replace("_encoded", encoded_value)
+            query = query.replace("_value", value)
 
-    return render(request, 'delete.html', {'delete_form': delete_form})
+            payload_query = { "query": query }
+            success = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
+            success = json.loads(success)
+            print("SUCCESS: ", success["boolean"])
+            return render(request, 'delete.html', {'success': success})
+
+    return render(request, 'delete.html')
 
 
 def unified_search(query):
@@ -88,19 +103,15 @@ def unified_search(query):
 
 
     if query in directors:
-        print("DIRECTOR")
         return search_director(query)
         
     elif query in genres:
-        print("GENRE")
         return genres_search(query)
     
     elif query in actors:
-        print("ACTOR")
         return cast_search(query)
 
     else:
-        print("MOVIE")
         return movie_search(query)
 
 
@@ -280,41 +291,57 @@ def movie_search(movie_name):
                     ?title_code net:real_name "_movie_name" .
                     ?show_id net:title ?title_code .
                     
-                    ?show_id net:type ?type_code .
-                    ?type_code net:real_name ?type .
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
                     
                     ?title_code net:real_name ?title .
                     
-                    ?show_id net:director ?director_code .
-                    ?director_code net:real_name ?director .
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
                     
                     OPTIONAL {
                         ?show_id net:cast ?cast_code .
                         ?cast_code net:real_name ?cast .
                     }
                     
-                    ?show_id net:country ?country_code .
-                    ?country_code net:real_name ?country .
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
                     
-                    ?show_id net:date_added ?date_code .
-                    ?date_code net:real_name ?date_added .
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
                     
-                    ?show_id net:release_year ?release_code .
-                    ?release_code net:real_name ?release_year .
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
                     
-                    ?show_id net:rating ?rating_code .
-                    ?rating_code net:real_name ?rating .
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
                     
-                    ?show_id net:duration ?duration_code .
-                    ?duration_code net:real_name ?duration .
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
                     
                     OPTIONAL {
                         ?show_id net:listed_in ?genres_code .
                         ?genres_code net:real_name ?genres .
                     }
                     
-                    ?show_id net:description ?description_code .
-                    ?description_code net:real_name ?description .
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
                 }
                 GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?duration ?rating ?description
                     """
@@ -384,9 +411,6 @@ def cast_search(cast_name):
     res = json.loads(res)
 
     mod_js =  transform_json(res['results']['bindings'])
-
-    print("CAST: ")
-    print(mod_js)
 
     return mod_js
 
@@ -508,7 +532,6 @@ def date_search(date):
     return mod_js
 
 def genres_search(genres):
-    print("GENRE: " + genres)
     genres_split = [genre.strip() for genre in genres.split(',')]
 
     query = """
