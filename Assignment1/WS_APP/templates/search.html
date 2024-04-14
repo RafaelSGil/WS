@@ -1,62 +1,73 @@
 {% extends 'layout.html' %} {% block content %}
 
 <div class="container mt-2 mb-10">
-  <h1>Search options</h1>
-  <br />
-  <div class="row">
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for a specific movie</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ movie_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="movie_search">
-          Search
+  <div class="accordion accordion-flush" id="accordionFlushExample">
+    <div class="accordion-item">
+      <h1 class="accordion-header" id="flush-headingOne">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+          Search options
         </button>
-      </form>
-    </div>
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for a specific cast member</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ cast_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="cast_search">
-          Search
-        </button>
-      </form>
-    </div>
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for a specific director</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ director_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="director_search">
-          Search
-        </button>
-      </form>
-    </div>
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for movies between dates</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ between_dates_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="between_dates_search">
-          Search
-        </button>
-      </form>
-    </div>
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for movies release in a given year</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ date_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="date_search">
-          Search
-        </button>
-      </form>
-    </div>
-    <div class="col-md-4">
-      <h4 class="mb-3">Search for movies based on genres</h3>
-      <form action="{% url 'search' %}" method="POST">
-        {% csrf_token %} {{ genres_form.as_p }}
-        <button type="submit" class="btn btn-primary mb-3" name="genres_search">
-          Search
-        </button>
-      </form>
+      </h1>
+      <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+        <div class="accordion-body">
+          <div class="row">
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for a specific movie</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ movie_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="movie_search">
+                  Search
+                </button>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for a specific cast member</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ cast_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="cast_search">
+                  Search
+                </button>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for a specific director</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ director_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="director_search">
+                  Search
+                </button>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for movies between dates</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ between_dates_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="between_dates_search">
+                  Search
+                </button>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for movies release in a given year</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ date_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="date_search">
+                  Search
+                </button>
+              </form>
+            </div>
+            <div class="col-md-4">
+              <h4 class="mb-3">Search for movies based on genres</h3>
+              <form action="{% url 'search' %}" method="POST">
+                {% csrf_token %} {{ genres_form.as_p }}
+                <button type="submit" class="btn btn-primary mb-3" name="genres_search">
+                  Search
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
