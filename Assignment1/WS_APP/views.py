@@ -52,7 +52,7 @@ def home(request):
 
         print(results)
 
-    search_grid_res = search_grid()
+    genres_grid_res = genres_grid()
 
     context = {
         'form': form,
@@ -61,11 +61,13 @@ def home(request):
         'date_form': date_form,
         'results': results,
         'search_performed': search_performed,
-        'search_grid': search_grid_res,
+        'genre_grid': genres_grid_res,
+        'cast_grid': ["Will Smith", "Margot Robbie", "Nicole Kidman", "Brad Pitt"],
+        'director_grid': ["Steven Spielberg", "Martin Scorsese", "Quentin Tarantino", "Tim Burton"],
     }
     return render(request, 'home.html', context)
 
-def search_grid():
+def genres_grid():
     query_top_genres = """
                             PREFIX net: <http://ws.org/netflix_info/pred/>
 
@@ -82,7 +84,6 @@ def search_grid():
     payload_query = { "query": query_top_genres }
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
     return json.loads(res)['results']['bindings']
-
 
 def delete(request):
     success = None

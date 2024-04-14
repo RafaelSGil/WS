@@ -130,16 +130,92 @@
   {% endif %}
   <br />
   <br /><br />
-  {% if search_grid %}
+  {% if genre_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
   <div class="container">
+    <h2 class="mb-3">Top Movie Genres</h2>
     <div class="row">
-      {% for genre in search_grid %}
+      {% for genre in genre_grid %}
       <div class="col-md-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">{{ genre.genres.value }}</h5>
-            <p class="card-text">Count: {{ genre.count.value }}</p>
-          </div>
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="genre_search"
+                  value="{{ genre.genres.value }}"
+                >
+                  {{ genre.genres.value }}
+                </button>
+              </h5>
+              <p class="card-text text-center">{{ genre.count.value }}</p>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if cast_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3">Famous Movie Actors</h2>
+    <div class="row">
+      {% for actor in cast_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="cast_search"
+                  value="{{ actor }}"
+                >
+                  {{ actor }}
+                </button>
+              </h5>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if director_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3">Famous Movie Directors</h2>
+    <div class="row">
+      {% for director in director_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="director_search"
+                  value="{{ director }}"
+                >
+                  {{ director }}
+                </button>
+              </h5>
+            </div>
+          </form>
         </div>
       </div>
       {% endfor %}
