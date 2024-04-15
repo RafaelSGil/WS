@@ -250,6 +250,8 @@ def unified_search(query):
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
 
+    print(genres)
+    
     if query in actors:
         results.extend(cast_search(query))
         
