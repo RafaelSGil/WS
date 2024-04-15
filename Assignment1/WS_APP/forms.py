@@ -34,7 +34,7 @@ class DirectorForm(forms.Form):
 
 
 class SearchForm(forms.Form):
-    search_query = forms.CharField(label='Search', max_length=100)
+    search_query = forms.CharField(label='', max_length=100)
 
 class DeleteForm(forms.Form):
     delete = forms.CharField(label="Value to delete", )

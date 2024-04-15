@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Add a New Movie</h1>
+    <form action="{% url 'insert' %}" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="movieName">Movie Name</label>
+            <input type="text" class="form-control" id="movieName" name="movie_name" required>
+        </div>
+        <div class="form-group">
+            <label for="movieDirector">Director</label>
+            <input type="text" class="form-control" id="movieDirector" name="movie_director" required>
+        </div>
+        <div class="form-group">
+            <label for="movieCountry">Country</label>
+            <input type="text" class="form-control" id="movieCountry" name="movie_country" required>
+        </div>
+        <div class="form-group">
+            <label for="movieRating">Rating</label>
+            <input type="text" class="form-control" id="movieRating" name="movie_rating" required>
+        </div>
+        <div class="form-group">
+            <label for="movieDuration">Duration</label>
+            <input type="text" class="form-control" id="movieDuration" name="movie_duration" required>
+        </div>
+        <div class="form-group">
+            <label for="movieGenres">Genres (comma-separated)</label>
+            <input type="text" class="form-control" id="movieGenres" name="movie_genres" required>
+        </div>
+        <div class="form-group">
+            <label for="movieCast">Cast (comma-separated)</label>
+            <input type="text" class="form-control" id="movieCast" name="movie_cast" required>
+        </div>
+        <div class="form-group">
+            <label for="movieType">Type</label>
+            <input type="text" class="form-control" id="movieType" name="movie_type" placeholder="e.g., Movie, TV Show" required>
+        </div>
+        <div class="form-group">
+            <label for="movieDateAdded">Date Added</label>
+            <input type="date" class="form-control" id="movieDateAdded" name="movie_date_added">
+        </div>
+        <div class="form-group">
+            <label for="movieReleaseYear">Release Year</label>
+            <input type="text" class="form-control" id="movieReleaseYear" name="movie_release_year">
+        </div>
+        <div class="form-group">
+            <label for="movieDescription">Description</label>
+            <textarea class="form-control" id="movieDescription" name="movie_description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Movie</button>
+    </form>
+    {% if success %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -24,4 +24,5 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('search_alternative/', views.search_alternative, name='search_alternative'),
     path('delete/', views.delete, name='delete'),
+    path('insert', views.insert, name = 'insert')
 ]
