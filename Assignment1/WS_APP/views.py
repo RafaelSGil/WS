@@ -1,11 +1,11 @@
 from urllib.parse import quote
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
-
+import logging
 import json
 from s4api.graphdb_api import GraphDBApi
 from s4api.swagger import ApiClient
-
+import requests
 from WS_APP.forms import *
 
 # graphDB setup
@@ -60,6 +60,98 @@ def home(request):
         'search_performed': search_performed,
     }
     return render(request, 'home.html', context)
+
+def sparql_update(query, repo_name):
+    endpoint = "http://localhost:7200/repositories/" + repo_name + "/statements"
+    headers = {'Content-Type': 'application/sparql-update'}
+    response = requests.post(endpoint, data=query, headers=headers)
+    return response
+
+def insert(request):
+    context = {
+        'success': False,
+        'message': "No action performed."
+    }
+
+    if request.method == 'POST':
+        # Extracting form data
+        name = request.POST.get('movie_name')
+        director = request.POST.get('movie_director')
+        country = request.POST.get('movie_country')
+        rating = request.POST.get('movie_rating')
+        duration = request.POST.get('movie_duration')
+        genres = request.POST.get('movie_genres').split(',')
+        cast = request.POST.get('movie_cast').split(',')
+        date_added = request.POST.get('movie_date_added')
+        release_year = request.POST.get('movie_release_year')
+        description = request.POST.get('movie_description')
+        movie_type = 'Movie'  # Assuming all entries are movies for simplification
+
+        # Generate unique IDs for the new movie using the movie name
+        movie_id = name.replace(' ', '_')
+
+        # Start the INSERT DATA block
+        query = f"""
+        PREFIX pred: <http://ws.org/netflix_info/pred/>
+        PREFIX net: <http://ws.org/netflix_info/>
+        INSERT DATA {{
+            net:{movie_id} pred:show_id "{movie_id}".
+            net:{movie_id} pred:type net:{movie_type}.
+            net:{movie_type} pred:real_name "{movie_type}".
+            net:{movie_id} pred:title net:{name.replace(' ', '_')}.
+            net:{name.replace(' ', '_')} pred:real_name "{name}".
+            net:{movie_id} pred:director net:{director.replace(' ', '_')}.
+            net:{director.replace(' ', '_')} pred:real_name "{director}".
+        """
+
+        # Adding cast members
+        for actor in cast:
+            actor_id = actor.strip().replace(' ', '_')
+            query += f"net:{movie_id} pred:cast net:{actor_id}.\n"
+            query += f"net:{actor_id} pred:real_name \"{actor.strip()}\".\n"
+
+        # Adding additional properties
+        query += f"""
+            net:{movie_id} pred:country net:Country_{country.replace(' ', '_')}.
+            net:Country_{country.replace(' ', '_')} pred:real_name "{country}".
+            net:{movie_id} pred:date_added net:Date_{date_added.replace('-', '_')}.
+            net:Date_{date_added.replace('-', '_')} pred:real_name "{date_added}".
+            net:{movie_id} pred:release_year net:Year_{release_year}.
+            net:Year_{release_year} pred:real_name "{release_year}".
+            net:{movie_id} pred:rating net:Rating_{rating.replace(' ', '_')}.
+            net:Rating_{rating.replace(' ', '_')} pred:real_name "{rating}".
+            net:{movie_id} pred:duration net:Duration_{duration.replace(' ', '_')}.
+            net:Duration_{duration.replace(' ', '_')} pred:real_name "{duration}".
+        """
+
+        # Adding genres
+        for genre in genres:
+            genre_id = genre.strip().replace(' ', '_')
+            query += f"net:{movie_id} pred:listed_in net:Genre_{genre_id}.\n"
+            query += f"net:Genre_{genre_id} pred:real_name \"{genre.strip()}\".\n"
+
+        query += f"net:{movie_id} pred:description net:Desc_{movie_id}.\n"
+        query += f"net:Desc_{movie_id} pred:real_name \"{description}\".\n"
+        query += "}\n"
+
+        # Debug print or log
+        print(query)  # or use logging to track
+        
+      
+        try:
+            response = sparql_update(query, repo_name)
+            if response.status_code == 200:
+                context['success'] = True
+                context['message'] = "Movie added successfully!"
+            else:
+                context['message'] = "Failed to add movie. Response: " + response.text
+
+            return render(request, 'insert.html', context)
+        except Exception as e:
+            context['message'] = f"Error adding movie: {str(e)}"
+
+    return render(request, 'insert.html', context)
+
 
 def delete(request):
     success = None
@@ -157,15 +249,14 @@ def unified_search(query):
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
 
-
-    if query in directors:
-        return search_director(query)
+    if query in actors:
+        return cast_search(query)
         
     elif query in genres:
         return genres_search(query)
     
-    elif query in actors:
-        return cast_search(query)
+    elif query in directors:
+        return search_director(query)
 
     else:
         return movie_search(query)
@@ -763,13 +854,17 @@ def fetch_genres(accessor, repo_name):
 def fetch_all_movies():
     query = """
             PREFIX netflix: <http://ws.org/netflix_info/pred/>
-            SELECT ?movies ?description WHERE {
+
+            SELECT ?movies ?description 
+            WHERE {
                 ?fa netflix:title ?movies_code .
                 ?movies_code netflix:real_name ?movies .
                 ?fa netflix:description ?description_code .
                 ?description_code netflix:real_name ?description .
             }
-        """
+            """
     payload_query = {"query": query}
     res = accessor.sparql_select(body=payload_query, repo_name=repo_name)
     return json.loads(res)["results"]["bindings"]
+
+

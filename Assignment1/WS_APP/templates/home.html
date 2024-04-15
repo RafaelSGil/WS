@@ -1,17 +1,23 @@
-{% extends 'layout.html' %} {% block content %}
-<div class="container mt-5">
+{% extends 'layout.html' %} {% block content %} {% load static %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}" />
+
+<div class="container mt-5 text-center">
   <h1>Welcome to MoviePedia</h1>
   <p>Discover and explore your favorite movies with MoviePedia!</p>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" name="movie_search">Search</button>
-  </form>
+  <div class="search-container">
+      <form method="post" class="search-form">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" name="movie_search" class="btn btn-primary">Search</button>
+      </form>
+  </div>
+
+
 
   <!-- MODAL -->
-  <button type="button" class="btn btn-info" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</button>
-
+  <a href="#" class="btn btn-link" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
+</div>
     <!-- Modal for Advanced Search -->
     <div class="modal fade" id="advancedSearchModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -45,46 +51,88 @@
     </div>
 
 
-  {% if results %}
+  {% if results %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
   <h2>Search Results:</h2>
-  <div class="container-card" onwheel="horizontalScroll(event)">
+  <div class="row">
     {% for entry in results %}
-    <div class="card">
-      <div class="card-body">
-        <h3 class="card-title card-break">{{ entry.title.value }}</h3>
-        <br />
-        <p class="card-text card-break toggle-text">
-          <strong>Cast:</strong> {{ entry.mergedCasts.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Release:</strong> {{ entry.release_year.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Genres:</strong> {{ entry.mergedGenres.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Director:</strong> {{ entry.director.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Country:</strong> {{ entry.country.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Rating:</strong> {{ entry.rating.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Duration:</strong> {{ entry.duration.value }}
-        </p>
-        <p class="card-text card-break toggle-text">
-          <strong>Description:</strong> {{ entry.description.value }}
-        </p>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">{{ entry.title.value }}</h4>
+          <br>
+          <p><strong>Release:</strong> {{ entry.release_year.value }}</p>
+          <p><strong>Description:</strong> {{ entry.description.value }}</p>
+          <!-- Trigger modal -->
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#detailModal{{ forloop.counter }}">View More</button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Modal -->
+    <div class="modal fade" id="detailModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="detailModalLabel{{ forloop.counter }}" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailModalLabel{{ forloop.counter }}">{{ entry.title.value }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <th>Director</th>
+                  <td>{{ entry.director.value }}</td>
+                </tr>
+                <tr>
+                  <th>Country</th>
+                  <td>{{ entry.country.value }}</td>
+                </tr>
+                <tr>
+                  <th>Rating</th>
+                  <td>{{ entry.rating.value }}</td>
+                </tr>
+                <tr>
+                  <th>Duration</th>
+                  <td>{{ entry.duration.value }}</td>
+                </tr>
+                <tr>
+                  <th>Genres</th>
+                  <td>
+                    <ul class="list-unstyled">
+                      {% for key, genre in entry.mergedGenres.values.items %}
+                        <li>{{ genre }}</li>
+                      {% endfor %}
+                    </ul>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Cast</th>
+                  <td>
+                    <ul class="list-unstyled">
+                      {% for key, cast_member in entry.mergedCasts.values.items %}
+                        <li>{{ cast_member }}</li>
+                      {% endfor %}
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
       </div>
     </div>
     {% endfor %}
   </div>
+  
+  </div>
 
   {% elif search_performed %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
-  <li></li>
+  <br>
   <h3>No results found... Here's every movie available</h3>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for results in all_result %}
