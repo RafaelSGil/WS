@@ -244,22 +244,25 @@ def delete(request):
 
 
 def unified_search(query):
+    results = []
     
     genres = fetch_genres(accessor, repo_name)
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
 
     if query in actors:
-        return cast_search(query)
+        results.extend(cast_search(query))
         
-    elif query in genres:
-        return genres_search(query)
+    if query in genres:
+        results.extend(genres_search(query))
     
-    elif query in directors:
-        return search_director(query)
+    if query in directors:
+        results.extend(search_director(query))
 
-    else:
-        return movie_search(query)
+    if not results:
+        results.extend(movie_search(query))
+
+    return results
 
 
 
