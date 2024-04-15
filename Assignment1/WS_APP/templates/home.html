@@ -1,9 +1,10 @@
 {% extends 'layout.html' %} {% block content %} {% load static %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
+<link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
 
 <div class="container mt-5 text-center">
-  <h1 style="color: white;">Welcome to MoviePedia</h1>
-  <h5 style="color: white;">Discover and explore your favorite Netflix movies with MoviePedia!</h5>
+  <h1 class="text-white">Welcome to MoviePedia</h1>
+  <h5 class="text-white">Discover and explore your favorite Netflix movies with MoviePedia!</h5>
   <br>
   <div class="search-container">
     <form method="post" class="search-form">
@@ -12,8 +13,8 @@
           <input type="text" name="search_query" class="form-control form-control-lg" placeholder="Enter movies, actors, directors...">
       </div>
       <br> 
-      <button type="submit" class="btn btn-lg" name="movie_search" style="background-color: #ed2b2b; color: white; border: none;">Search</button>
-      <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
+      <button type="submit" class="btn btn-lg text-white bg-danger" name="movie_search" style="border: none;">Search</button>
+      <a href="#" class="btn btn-outline-light" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
 
     </form>
   </div>
@@ -67,7 +68,7 @@
 
   {% if results %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
-  <h2 style="color: white;">Your Search Results:</h2>
+  <h2 class="text-white">Your Search Results:</h2>
   <div class="row">
     {% for entry in results %}
     <div class="col-md-4">
@@ -78,7 +79,7 @@
           <p><strong>Release:</strong> {{ entry.release_year.value }}</p>
           <p><strong>Description:</strong> {{ entry.description.value }}</p>
           <!-- Trigger modal -->
-          <button type="button" class="btn btn-lg" data-toggle="modal" data-target="#detailModal{{ forloop.counter }}" style="background-color: #ed2b2b; color: white; border: none;">View More</button>
+          <button type="button" class="btn btn-lg text-white bg-danger" data-toggle="modal" data-target="#detailModal{{ forloop.counter }}" style=" border: none;">View More</button>
         </div>
       </div>
     </div>
@@ -98,7 +99,12 @@
               <tbody>
                 <tr>
                   <th>Director</th>
-                  <td>{{ entry.director.value }}</td>
+                  <form action="{% url 'search_alternative' %}" class="mb-3" method="post">
+                    {% csrf_token %}
+                    <td >
+                      <button type="submit" class="button_text" name="director_search" value="{{ entry.director.value }}">{{ entry.director.value }}</button>
+                    </td>
+                  </form>
                 </tr>
                 <tr>
                   <th>Country</th>
@@ -114,23 +120,28 @@
                 </tr>
                 <tr>
                   <th>Genres</th>
-                  <td>
-                    <ul class="list-unstyled">
-                      {% for key, genre in entry.mergedGenres.values.items %}
-                        <li>{{ genre }}</li>
-                      {% endfor %}
-                    </ul>
-                  </td>
+                  <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+                    {% csrf_token %}
+                      <td>
+                        {% for index, genre in entry.mergedGenres.values.items %}
+                          <button type="submit" class="button_text" name="genre_search" value="{{ genre }}">{{ genre }}</button>
+                          {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      </td>
+                  </form>
+                  
                 </tr>
                 <tr>
                   <th>Cast</th>
-                  <td>
-                    <ul class="list-unstyled">
-                      {% for key, cast_member in entry.mergedCasts.values.items %}
-                        <li>{{ cast_member }}</li>
+                  <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+                    <td>
+                      {% csrf_token %}
+                      {% for index, cast in entry.mergedCasts.values.items %}
+                      <button type="submit" class="button_text" name="cast_search" value="{{ cast }}">{{ cast }}</button>
+                        {% if not forloop.last %}, {% endif %}
                       {% endfor %}
-                    </ul>
-                  </td>
+                    </td>
+                  </form>
                 </tr>
               </tbody>
             </table>
@@ -148,7 +159,7 @@
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
   <br>
   <br>
-  <h3 style="color: white">No results found... Here's every movie available!</h3>
+  <h3 class="text-white">No results found... Here's every movie available!</h3>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for results in all_result %}
     <div class="card">
@@ -160,5 +171,101 @@
     {% endfor %}
   </div>
   {% endif %}
+  <br />
+  <br /><br />
+  {% if genre_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Top Movie Genres</h2>
+    <div class="row">
+      {% for genre in genre_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="genre_search"
+                  value="{{ genre.genres.value }}"
+                >
+                  {{ genre.genres.value }}
+                </button>
+              </h5>
+              <p class="card-text text-center">{{ genre.count.value }}</p>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if cast_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Famous Movie Actors</h2>
+    <div class="row">
+      {% for actor in cast_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="cast_search"
+                  value="{{ actor }}"
+                >
+                  {{ actor }}
+                </button>
+              </h5>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if director_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Famous Movie Directors</h2>
+    <div class="row">
+      {% for director in director_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="director_search"
+                  value="{{ director }}"
+                >
+                  {{ director }}
+                </button>
+              </h5>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
 </div>
+<br /><br /><br />
+
 {% endblock %}

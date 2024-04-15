@@ -50,7 +50,8 @@ def home(request):
         if not results:
             all_result = fetch_all_movies()
 
-        print(results)
+    genres_grid_res = genres_grid()
+
     context = {
         'form': form,
         'all_result': all_result,
@@ -58,8 +59,29 @@ def home(request):
         'date_form': date_form,
         'results': results,
         'search_performed': search_performed,
+        'genre_grid': genres_grid_res,
+        'cast_grid': ["Will Smith", "Margot Robbie", "Nicole Kidman", "Brad Pitt"],
+        'director_grid': ["Steven Spielberg", "Martin Scorsese", "Quentin Tarantino", "Tim Burton"],
     }
     return render(request, 'home.html', context)
+
+def genres_grid():
+    query_top_genres = """
+                            PREFIX net: <http://ws.org/netflix_info/pred/>
+
+                            SELECT ?genres (COUNT(?genres) as ?count)
+                            WHERE {
+                                ?movie net:listed_in ?genres_code .
+                                ?genres_code net:real_name ?genres .
+                            }
+                            GROUP BY ?genres
+                            ORDER BY DESC(?count)
+                            LIMIT 4
+                        """
+    
+    payload_query = { "query": query_top_genres }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
+    return json.loads(res)['results']['bindings']
 
 def sparql_update(query, repo_name):
     endpoint = "http://localhost:7200/repositories/" + repo_name + "/statements"
@@ -133,9 +155,6 @@ def insert(request):
         query += f"net:{movie_id} pred:description net:Desc_{movie_id}.\n"
         query += f"net:Desc_{movie_id} pred:real_name \"{description}\".\n"
         query += "}\n"
-
-        # Debug print or log
-        print(query)  # or use logging to track
         
       
         try:
@@ -191,7 +210,6 @@ def delete(request):
             payload_query = { "query": query }
             success = accessor.sparql_select(body=payload_query, repo_name=repo_name)  
             success = json.loads(success)
-            print("SUCCESS: ", success["boolean"])
             return render(request, 'delete.html', {'success': success})
         
         if "delete_entire_genre" in request.POST:
@@ -249,8 +267,6 @@ def unified_search(query):
     genres = fetch_genres(accessor, repo_name)
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
-
-    print(genres)
     
     if query in actors:
         results.extend(cast_search(query))
