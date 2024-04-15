@@ -19,12 +19,30 @@
     <link rel="stylesheet" href="{% static 'css/layout.css' %}" />
     
     <style>
-      .content-con {
-        min-height: 850px;
-        width: 100%;
-        padding: 30px 50px;
-        margin: 0 auto;
-      }
+        body {
+    background-image: url('{% static "images/fon-netflix-logo-raduga-tsvet-fon-background-skachat-oboi-sk.jpg" %}');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+  }
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);  /* Dark overlay with 50% opacity */
+    z-index: -1;  /* Ensures the overlay is behind the content */
+}
+  .content-con {
+    min-height: 850px;
+    width: 100%;
+    padding: 30px 50px;
+    margin: 0 auto;
+  }
     </style>
   </head>
   <body>
@@ -47,8 +65,8 @@
         <div class="navbar-nav">
           <a class="nav-item nav-link active" href="{% url 'home' %}">Home</a>
           <!--<a class="nav-item nav-link" href="{% url 'search' %}">Search</a>-->
-          <a class="nav-item nav-link" href="{% url 'delete' %}">Delete</a>
-          <a class="nav-item nav-link" href="{% url 'insert' %}">Insert</a>
+          <a class="nav-item nav-link active" href="{% url 'delete' %}">Delete</a>
+          <a class="nav-item nav-link active" href="{% url 'insert' %}">Insert</a>
         </div>
       </div>
     </nav>

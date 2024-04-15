@@ -1,7 +1,7 @@
 {% extends 'layout.html' %} {% block content %}
 <div class="container mt-2 mb-10">
-  <h1>Delete data...</h1>
-  <p>Insert a name to delete it from the database</p>
+  <h2 style="color: white;">Delete Data...</h2>
+  <h6 style="color: white;">Insert a name to delete it from the database</h6>
   <br />
   <form action="{% url 'delete' %}" method="post" class="input-group">
     {% csrf_token %}
@@ -14,7 +14,7 @@
       name="delete_value"
     />
     <button type="submit" class="btn btn-outline-danger" name="delete_data">
-      delete
+      Delete
     </button>
   </form>
   <br />
@@ -25,11 +25,8 @@
   <h3 class="text-danger">Failed to delete data</h3>
   {% endif %} {% endif %}
   <br /><br /><br /><br />
-  <h1>Delete an entire genre...</h1>
-  <p>
-    Insert a genre to delete it from the database, including every movie
-    belonging to it
-  </p>
+  <h2 style="color: white;">Delete an entire genre...</h2>
+  <h6 style="color: white;">Insert a genre to delete it from the database, including every movie belonging to it</h6>
   <br />
   <form action="{% url 'delete' %}" method="post" class="input-group">
     {% csrf_token %}
@@ -46,7 +43,7 @@
       class="btn btn-outline-danger"
       name="delete_entire_genre"
     >
-      delete
+      Delete genre
     </button>
   </form>
   <br />

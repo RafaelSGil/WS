@@ -2,21 +2,25 @@
 <link rel="stylesheet" href="{% static 'css/home.css' %}" />
 
 <div class="container mt-5 text-center">
-  <h1>Welcome to MoviePedia</h1>
-  <p>Discover and explore your favorite movies with MoviePedia!</p>
-
+  <h1 style="color: white;">Welcome to MoviePedia</h1>
+  <h5 style="color: white;">Discover and explore your favorite Netflix movies with MoviePedia!</h5>
+  <br>
   <div class="search-container">
-      <form method="post" class="search-form">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <button type="submit" name="movie_search" class="btn btn-primary">Search</button>
-      </form>
+    <form method="post" class="search-form">
+      {% csrf_token %}
+      <div class="form-group">
+          <input type="text" name="search_query" class="form-control form-control-lg" placeholder="Enter movies, actors, directors...">
+      </div>
+      <br> 
+      <button type="submit" class="btn btn-lg" name="movie_search" style="background-color: #ed2b2b; color: white; border: none;">Search</button>
+      <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
+
+    </form>
   </div>
 
-
+<br>
 
   <!-- MODAL -->
-  <a href="#" class="btn btn-link" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
 </div>
     <!-- Modal for Advanced Search -->
     <div class="modal fade" id="advancedSearchModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
@@ -29,20 +33,30 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <!-- Form for searching between dates -->
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ between_dates_form.as_p }}
-                        <button type="submit" name="between_dates_search" class="btn btn-primary mb-3">Search Dates</button>
-                    </form>
-
-                    <!-- Form for searching by a specific date -->
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ date_form.as_p }}
-                        <button type="submit" name="date_search" class="btn btn-primary mb-3">Search Specific Date</button>
-                    </form>
-                </div>
+                  <div class="row">
+                      <!-- Form for searching between dates -->
+                      <div class="col-md-6">
+                          <form method="post">
+                              {% csrf_token %}
+                              <h6><strong>Search Between Dates</strong></h6>
+                              <br>
+                              {{ between_dates_form.as_p }}
+                              <button type="submit" name="between_dates_search" class="btn btn-outline-danger">Search Dates</button>
+                          </form>
+                      </div>
+                      
+                      <!-- Form for searching by a specific date -->
+                      <div class="col-md-6">
+                          <form method="post">
+                              {% csrf_token %}
+                              <h6><strong>Search Specific Date</strong></h6>
+                              <br>
+                              {{ date_form.as_p }}
+                              <button type="submit" name="date_search" class="btn btn-outline-danger">Search Specific Date</button>
+                          </form>
+                      </div>
+                  </div>
+              </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
@@ -53,7 +67,7 @@
 
   {% if results %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
-  <h2>Search Results:</h2>
+  <h2 style="color: white;">Your Search Results:</h2>
   <div class="row">
     {% for entry in results %}
     <div class="col-md-4">
@@ -133,7 +147,8 @@
   {% elif search_performed %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
   <br>
-  <h3>No results found... Here's every movie available</h3>
+  <br>
+  <h3 style="color: white">No results found... Here's every movie available!</h3>
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for results in all_result %}
     <div class="card">

@@ -140,7 +140,7 @@ def insert(request):
       
         try:
             response = sparql_update(query, repo_name)
-            if response.status_code == 200:
+            if response.status_code != 200:
                 context['success'] = True
                 context['message'] = "Movie added successfully!"
             else:

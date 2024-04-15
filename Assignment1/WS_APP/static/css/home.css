@@ -39,3 +39,30 @@
 .search-bar {
   width: 50%;
 }
+
+
+
+
+/* Custom styles for larger form controls */
+.form-control-lg {
+  font-size: 1.25rem; /* Larger text size */
+  height: calc(1.5em + 1rem + 2px); /* Taller input fields */
+  padding: .5rem 1rem; /* Larger padding for better readability */
+}
+
+.btn-lg {
+  padding: .5rem 1rem; /* Larger padding */
+  font-size: 1.25rem; /* Larger text size */
+  border-radius: .3rem; /* Optional: Adjust border-radius if needed */
+}
+
+
+
+.modal-body .col-md-6 {
+  padding-right: 15px; /* Adds spacing to the right of each form column */
+}
+
+/* Alternatively, you can add padding to the forms themselves */
+form {
+  padding: 10px; /* Adds padding inside each form for spacing */
+}
