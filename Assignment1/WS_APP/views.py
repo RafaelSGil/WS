@@ -458,54 +458,46 @@ def movie_search(movie_name):
                 WHERE {
                     ?title_code net:real_name "_movie_name" .
                     ?show_id net:title ?title_code .
+
+                    ?title_code net:real_name ?title .
                     
                     OPTIONAL{
                         ?show_id net:type ?type_code .
                         ?type_code net:real_name ?type .
                     }
                     
-                    ?title_code net:real_name ?title .
-                    
                     OPTIONAL {
                         ?show_id net:director ?director_code .
                         ?director_code net:real_name ?director .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:cast ?cast_code .
                         ?cast_code net:real_name ?cast .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:country ?country_code .
                         ?country_code net:real_name ?country .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:date_added ?date_code .
                         ?date_code net:real_name ?date_added .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:release_year ?release_code .
                         ?release_code net:real_name ?release_year .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:rating ?rating_code .
                         ?rating_code net:real_name ?rating .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:duration ?duration_code .
                         ?duration_code net:real_name ?duration .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:listed_in ?genres_code .
                         ?genres_code net:real_name ?genres .
                     }
-                    
                     OPTIONAL {
                         ?show_id net:description ?description_code .
                         ?description_code net:real_name ?description .
@@ -529,45 +521,59 @@ def cast_search(cast_name):
     query = """
                 PREFIX net: <http://ws.org/netflix_info/pred/>
 
-                SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts) ?country ?date_added ?release_year ?rating ?duration (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+                SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts)
+                         ?country ?date_added ?release_year ?rating ?duration 
+                         (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
                 WHERE {
                     ?castMember_code net:real_name "_cast_name" .
                     ?show_id net:cast ?castMember_code .
+
+                    OPTIONAL {
+                        ?show_id net:title ?title_code .
+                        ?title_code net:real_name ?title .
+                    }
+
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
                     
-                    ?show_id net:type ?type_code .
-                    ?type_code net:real_name ?type .
-                    
-                    ?show_id net:title ?title_code .
-                    ?title_code net:real_name ?title .
-                    
-                    ?show_id net:director ?director_code .
-                    ?director_code net:real_name ?director .
-                    
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
                     OPTIONAL {
                         ?show_id net:cast ?cast_code .
                         ?cast_code net:real_name ?cast .
                     }
-                    
-                    ?show_id net:country ?country_code .
-                    ?country_code net:real_name ?country .
-                    
-                    ?show_id net:date_added ?date_code .
-                    ?date_code net:real_name ?date_added .
-                    
-                    ?show_id net:release_year ?release_code .
-                    ?release_code net:real_name ?release_year .
-                    
-                    ?show_id net:rating ?rating_code .
-                    ?rating_code net:real_name ?rating .
-                    
-                    ?show_id net:duration ?duration_code .
-                    ?duration_code net:real_name ?duration .
-                    
-                    ?show_id net:listed_in ?genres_code .
-                    ?genres_code net:real_name ?genres .
-                    
-                    ?show_id net:description ?desc_code .
-                    ?desc_code net:real_name ?description .
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
+                    OPTIONAL {
+                        ?show_id net:listed_in ?genres_code .
+                        ?genres_code net:real_name ?genres .
+                    }
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
                 }
                 GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
             """
@@ -593,40 +599,52 @@ def between_dates_search(date1, date2):
                 ?show_id net:release_year ?rel_code .
                 FILTER (?year >= "_date1" && ?year <= "_date2")
                 
-                ?show_id net:type ?type_code .
-                ?type_code net:real_name ?type .
-                
-                ?show_id net:title ?title_code .
-                ?title_code net:real_name ?title .
-                
-                ?show_id net:director ?director_code .
-                ?director_code net:real_name ?director .
-                
                 OPTIONAL {
-                    ?show_id net:cast ?cast_code .
-                    ?cast_code net:real_name ?cast .
-                }
-                
-                ?show_id net:country ?country_code .
-                ?country_code net:real_name ?country .
-                
-                ?show_id net:date_added ?date_code .
-                ?date_code net:real_name ?date_added .
-                
-                ?show_id net:release_year ?release_code .
-                ?release_code net:real_name ?release_year .
-                
-                ?show_id net:rating ?rating_code .
-                ?rating_code net:real_name ?rating .
-                
-                ?show_id net:duration ?duration_code .
-                ?duration_code net:real_name ?duration .
-                
-                ?show_id net:listed_in ?genres_code .
-                ?genres_code net:real_name ?genres .
-                
-                ?show_id net:description ?desc_code .
-                ?desc_code net:real_name ?description .
+                        ?show_id net:title ?title_code .
+                        ?title_code net:real_name ?title .
+                    }
+
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
+                    
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
+                    OPTIONAL {
+                        ?show_id net:cast ?cast_code .
+                        ?cast_code net:real_name ?cast .
+                    }
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
+                    OPTIONAL {
+                        ?show_id net:listed_in ?genres_code .
+                        ?genres_code net:real_name ?genres .
+                    }
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
             }
             GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
             """
@@ -651,40 +669,52 @@ def date_search(date):
                 ?show_id net:release_year ?rel_code .
                 FILTER (?year = "_date")
                 
-                ?show_id net:type ?type_code .
-                ?type_code net:real_name ?type .
-                
-                ?show_id net:title ?title_code .
-                ?title_code net:real_name ?title .
-                
-                ?show_id net:director ?director_code .
-                ?director_code net:real_name ?director .
-                
                 OPTIONAL {
-                    ?show_id net:cast ?cast_code .
-                    ?cast_code net:real_name ?cast .
-                }
-                
-                ?show_id net:country ?country_code .
-                ?country_code net:real_name ?country .
-                
-                ?show_id net:date_added ?date_code .
-                ?date_code net:real_name ?date_added .
-                
-                ?show_id net:release_year ?release_code .
-                ?release_code net:real_name ?release_year .
-                
-                ?show_id net:rating ?rating_code .
-                ?rating_code net:real_name ?rating .
-                
-                ?show_id net:duration ?duration_code .
-                ?duration_code net:real_name ?duration .
-                
-                ?show_id net:listed_in ?genres_code .
-                ?genres_code net:real_name ?genres .
-                
-                ?show_id net:description ?desc_code .
-                ?desc_code net:real_name ?description .
+                        ?show_id net:title ?title_code .
+                        ?title_code net:real_name ?title .
+                    }
+
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
+                    
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
+                    OPTIONAL {
+                        ?show_id net:cast ?cast_code .
+                        ?cast_code net:real_name ?cast .
+                    }
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
+                    OPTIONAL {
+                        ?show_id net:listed_in ?genres_code .
+                        ?genres_code net:real_name ?genres .
+                    }
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
             }
             GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
             """
@@ -724,40 +754,52 @@ def genres_search(genres):
             query = query + """UNION"""
 
     query = query + """
-                    ?show_id net:type ?type_code .
-                    ?type_code net:real_name ?type .
+                    OPTIONAL {
+                        ?show_id net:title ?title_code .
+                        ?title_code net:real_name ?title .
+                    }
+
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
                     
-                    ?show_id net:title ?title_code .
-                    ?title_code net:real_name ?title .
-                    
-                    ?show_id net:director ?director_code .
-                    ?director_code net:real_name ?director .
-                    
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
                     OPTIONAL {
                         ?show_id net:cast ?cast_code .
                         ?cast_code net:real_name ?cast .
                     }
-                    
-                    ?show_id net:country ?country_code .
-                    ?country_code net:real_name ?country .
-                    
-                    ?show_id net:date_added ?date_code .
-                    ?date_code net:real_name ?date_added .
-                    
-                    ?show_id net:release_year ?release_code .
-                    ?release_code net:real_name ?release_year .
-                    
-                    ?show_id net:rating ?rating_code .
-                    ?rating_code net:real_name ?rating .
-                    
-                    ?show_id net:duration ?duration_code .
-                    ?duration_code net:real_name ?duration .
-                    
-                    ?show_id net:listed_in ?genres_code .
-                    ?genres_code net:real_name ?genres .
-                    
-                    ?show_id net:description ?desc_code .
-                    ?desc_code net:real_name ?description .
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
+                    OPTIONAL {
+                        ?show_id net:listed_in ?genres_code .
+                        ?genres_code net:real_name ?genres .
+                    }
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
                 }
                 GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
                     """
@@ -779,40 +821,52 @@ def search_director(director_name):
                 ?dir_code net:real_name "_director_name" .
                 ?show_id net:director ?dir_code .
                 
-                ?show_id net:type ?type_code .
-                ?type_code net:real_name ?type .
-                
-                ?show_id net:title ?title_code .
-                ?title_code net:real_name ?title .
-                
-                ?show_id net:director ?director_code .
-                ?director_code net:real_name ?director .
-                
                 OPTIONAL {
-                    ?show_id net:cast ?cast_code .
-                    ?cast_code net:real_name ?cast .
-                }
-                
-                ?show_id net:country ?country_code .
-                ?country_code net:real_name ?country .
-                
-                ?show_id net:date_added ?date_code .
-                ?date_code net:real_name ?date_added .
-                
-                ?show_id net:release_year ?release_code .
-                ?release_code net:real_name ?release_year .
-                
-                ?show_id net:rating ?rating_code .
-                ?rating_code net:real_name ?rating .
-                
-                ?show_id net:duration ?duration_code .
-                ?duration_code net:real_name ?duration .
-                
-                ?show_id net:listed_in ?genres_code .
-                ?genres_code net:real_name ?genres .
-                
-                ?show_id net:description ?desc_code .
-                ?desc_code net:real_name ?description .
+                        ?show_id net:title ?title_code .
+                        ?title_code net:real_name ?title .
+                    }
+
+                    OPTIONAL{
+                        ?show_id net:type ?type_code .
+                        ?type_code net:real_name ?type .
+                    }
+                    
+                    OPTIONAL {
+                        ?show_id net:director ?director_code .
+                        ?director_code net:real_name ?director .
+                    }
+                    OPTIONAL {
+                        ?show_id net:cast ?cast_code .
+                        ?cast_code net:real_name ?cast .
+                    }
+                    OPTIONAL {
+                        ?show_id net:country ?country_code .
+                        ?country_code net:real_name ?country .
+                    }
+                    OPTIONAL {
+                        ?show_id net:date_added ?date_code .
+                        ?date_code net:real_name ?date_added .
+                    }
+                    OPTIONAL {
+                        ?show_id net:release_year ?release_code .
+                        ?release_code net:real_name ?release_year .
+                    }
+                    OPTIONAL {
+                        ?show_id net:rating ?rating_code .
+                        ?rating_code net:real_name ?rating .
+                    }
+                    OPTIONAL {
+                        ?show_id net:duration ?duration_code .
+                        ?duration_code net:real_name ?duration .
+                    }
+                    OPTIONAL {
+                        ?show_id net:listed_in ?genres_code .
+                        ?genres_code net:real_name ?genres .
+                    }
+                    OPTIONAL {
+                        ?show_id net:description ?description_code .
+                        ?description_code net:real_name ?description .
+                    }
             }
             GROUP BY ?type ?title ?director ?country ?date_added ?release_year ?rating ?duration ?description
             """
