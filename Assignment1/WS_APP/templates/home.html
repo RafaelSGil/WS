@@ -14,16 +14,16 @@
       </div>
       <br> 
       <button type="submit" class="btn btn-lg text-white bg-danger" name="movie_search" style="border: none;">Search</button>
-      <a href="#" class="btn btn-outline-light" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>
+      <!--<a href="#" class="btn btn-outline-light" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>-->
+      <a href="/search" class="btn btn-outline-light">Advanced Search</a>
 
     </form>
   </div>
 
 <br>
 
-  <!-- MODAL -->
+  <!-- MODAL
 </div>
-    <!-- Modal for Advanced Search -->
     <div class="modal fade" id="advancedSearchModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -35,7 +35,6 @@
                 </div>
                 <div class="modal-body">
                   <div class="row">
-                      <!-- Form for searching between dates -->
                       <div class="col-md-6">
                           <form method="post">
                               {% csrf_token %}
@@ -46,7 +45,6 @@
                           </form>
                       </div>
                       
-                      <!-- Form for searching by a specific date -->
                       <div class="col-md-6">
                           <form method="post">
                               {% csrf_token %}
@@ -64,7 +62,7 @@
             </div>
         </div>
     </div>
-
+  -->
 
   {% if results %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
