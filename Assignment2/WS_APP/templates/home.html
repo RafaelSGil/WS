@@ -1,0 +1,269 @@
+{% extends 'layout.html' %} {% block content %} {% load static %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}" />
+<link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+
+<div class="container mt-5 text-center">
+  <h1 class="text-white">Welcome to MoviePedia</h1>
+  <h5 class="text-white">Discover and explore your favorite Netflix movies with MoviePedia!</h5>
+  <br>
+  <div class="search-container">
+    <form method="post" class="search-form">
+      {% csrf_token %}
+      <div class="form-group">
+          <input type="text" name="search_query" class="form-control form-control-lg" placeholder="Enter movies, actors, directors...">
+      </div>
+      <br> 
+      <button type="submit" class="btn btn-lg text-white bg-danger" name="movie_search" style="border: none;">Search</button>
+      <!--<a href="#" class="btn btn-outline-light" data-toggle="modal" data-target="#advancedSearchModal">Advanced Search</a>-->
+      <a href="/search" class="btn btn-outline-light">Advanced Search</a>
+
+    </form>
+  </div>
+
+<br>
+
+  <!-- MODAL
+</div>
+    <div class="modal fade" id="advancedSearchModal" tabindex="-1" role="dialog" aria-labelledby="advancedSearchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="advancedSearchModalLabel">Advanced Search Options</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                      <div class="col-md-6">
+                          <form method="post">
+                              {% csrf_token %}
+                              <h6><strong>Search Between Dates</strong></h6>
+                              <br>
+                              {{ between_dates_form.as_p }}
+                              <button type="submit" name="between_dates_search" class="btn btn-outline-danger">Search Dates</button>
+                          </form>
+                      </div>
+                      
+                      <div class="col-md-6">
+                          <form method="post">
+                              {% csrf_token %}
+                              <h6><strong>Search Specific Date</strong></h6>
+                              <br>
+                              {{ date_form.as_p }}
+                              <button type="submit" name="date_search" class="btn btn-outline-danger">Search Specific Date</button>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+  -->
+
+  {% if results %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <h2 class="text-white">Your Search Results:</h2>
+  <div class="row">
+    {% for entry in results %}
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">{{ entry.title.value }}</h4>
+          <br>
+          <p><strong>Release:</strong> {{ entry.release_year.value }}</p>
+          <p><strong>Description:</strong> {{ entry.description.value }}</p>
+          <!-- Trigger modal -->
+          <button type="button" class="btn btn-lg text-white bg-danger" data-toggle="modal" data-target="#detailModal{{ forloop.counter }}" style=" border: none;">View More</button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Modal -->
+    <div class="modal fade" id="detailModal{{ forloop.counter }}" tabindex="-1" aria-labelledby="detailModalLabel{{ forloop.counter }}" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailModalLabel{{ forloop.counter }}">{{ entry.title.value }}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <table class="table table-bordered">
+              <tbody>
+                <tr>
+                  <th>Director</th>
+                  <form action="{% url 'search_alternative' %}" class="mb-3" method="post">
+                    {% csrf_token %}
+                    <td >
+                      <button type="submit" class="button_text" name="director_search" value="{{ entry.director.value }}">{{ entry.director.value }}</button>
+                    </td>
+                  </form>
+                </tr>
+                <tr>
+                  <th>Country</th>
+                  <td>{{ entry.country.value }}</td>
+                </tr>
+                <tr>
+                  <th>Rating</th>
+                  <td>{{ entry.rating.value }}</td>
+                </tr>
+                <tr>
+                  <th>Duration</th>
+                  <td>{{ entry.duration.value }}</td>
+                </tr>
+                <tr>
+                  <th>Genres</th>
+                  <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+                    {% csrf_token %}
+                      <td>
+                        {% for index, genre in entry.mergedGenres.values.items %}
+                          <button type="submit" class="button_text" name="genre_search" value="{{ genre }}">{{ genre }}</button>
+                          {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                      </td>
+                  </form>
+                  
+                </tr>
+                <tr>
+                  <th>Cast</th>
+                  <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
+                    <td>
+                      {% csrf_token %}
+                      {% for index, cast in entry.mergedCasts.values.items %}
+                      <button type="submit" class="button_text" name="cast_search" value="{{ cast }}">{{ cast }}</button>
+                        {% if not forloop.last %}, {% endif %}
+                      {% endfor %}
+                    </td>
+                  </form>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  </div>
+
+  {% elif search_performed %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search.css' %}" />
+  <br>
+  <br>
+  <h3 class="text-white">No results found... Here's every movie available!</h3>
+  <div class="container-card" onwheel="horizontalScroll(event)">
+    {% for results in all_result %}
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title card-break">{{ results.movies.value }}</h5>
+        <p class="card-text card-break">{{ results.description.value }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if genre_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Top Movie Genres</h2>
+    <div class="row">
+      {% for genre in genre_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="genre_search"
+                  value="{{ genre.genres.value }}"
+                >
+                  {{ genre.genres.value }}
+                </button>
+              </h5>
+              <p class="card-text text-center">{{ genre.count.value }}</p>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if cast_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Famous Movie Actors</h2>
+    <div class="row">
+      {% for actor in cast_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="cast_search"
+                  value="{{ actor }}"
+                >
+                  {{ actor }}
+                </button>
+              </h5>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  <br />
+  <br /><br />
+  {% if director_grid %} {% load static %}
+  <link rel="stylesheet" href="{% static 'css/search_2.css' %}" />
+  <div class="container">
+    <h2 class="mb-3 text-white">Famous Movie Directors</h2>
+    <div class="row">
+      {% for director in director_grid %}
+      <div class="col-md-3">
+        <div class="card d-flex justify-content-center">
+          <form action="{% url 'search_alternative' %}" method="post">
+            {% csrf_token %}
+            <div class="card-body">
+              <h5 class="card-title text-center">
+                <button
+                  class="button_text"
+                  type="submit"
+                  name="director_search"
+                  value="{{ director }}"
+                >
+                  {{ director }}
+                </button>
+              </h5>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+<br /><br /><br />
+
+{% endblock %}

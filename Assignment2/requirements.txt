@@ -1,0 +1,4 @@
+Django==3.2.12
+s4api==1.1.0
+rdflib==6.0.0
+django-bootstrap-v5==1.0.11 
