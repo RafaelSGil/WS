@@ -593,13 +593,15 @@ def between_dates_search(date1, date2):
     query = """
             PREFIX net: <http://ws.org/netflix_info/pred/>
 
-            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts) ?country ?date_added ?release_year ?rating ?duration (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts)
+              ?country ?date_added ?release_year ?rating ?duration 
+              (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
             WHERE {
                 ?rel_code net:real_name ?year .
                 ?show_id net:release_year ?rel_code .
                 FILTER (?year >= "_date1" && ?year <= "_date2")
                 
-                OPTIONAL {
+                    OPTIONAL {
                         ?show_id net:title ?title_code .
                         ?title_code net:real_name ?title .
                     }
@@ -663,7 +665,9 @@ def date_search(date):
     query = """
             PREFIX net: <http://ws.org/netflix_info/pred/>
 
-            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts) ?country ?date_added ?release_year ?rating ?duration (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts)
+              ?country ?date_added ?release_year ?rating ?duration 
+              (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
             WHERE {
                 ?rel_code net:real_name ?year .
                 ?show_id net:release_year ?rel_code .
@@ -816,7 +820,9 @@ def search_director(director_name):
     query = """
             PREFIX net: <http://ws.org/netflix_info/pred/>
 
-            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts) ?country ?date_added ?release_year ?rating ?duration (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+            SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts)
+              ?country ?date_added ?release_year ?rating ?duration 
+              (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
             WHERE {
                 ?dir_code net:real_name "_director_name" .
                 ?show_id net:director ?dir_code .
