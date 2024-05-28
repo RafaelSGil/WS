@@ -18,11 +18,45 @@ sub:TVShow rdf:type rdfs:Class ;
 sub:Movie rdf:type rdfs:Class ;
     rdfs:subClassOf schema:Media . 
 
+sub:Adults rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
+sub:Teens rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
+sub:Kids rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
 sub:Actor rdf:type rdfs:Class ;
     rdfs:subClassOf schema:Person .
 
 sub:Director rdf:type rdfs:Class ;
     rdfs:subClassOf schema:Person .
+
+# Sub Sub-Classes
+sub:OldMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:RecentMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:LongMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:ShortMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:OldTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:RecentTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:LongTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:ShortTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
 
 # Properties
 pred:text rdf:type rdf:Property .
