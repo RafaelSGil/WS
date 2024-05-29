@@ -961,7 +961,8 @@ def fetch_all_movies():
 def inferences(request):
     if request.method == 'POST':
         if 'spin' in request.POST:
-            return render(request, 'inferences.html')
+            context = execute_spin()
+            return render(request, 'inferences.html', context)
         
         if 'person_search' in request.POST:
             person = request.POST.get('person_type')
@@ -1073,7 +1074,8 @@ def inferences(request):
 
         results = inference_media(type_class, rating, duration)
         num_results = len(results)
-
+        if num_results > 200:
+            results = results[:200]
         return render(request, 'inferences.html', {'results': results, 'num_results': num_results, 'prompt': prompt})
 
         
@@ -1167,3 +1169,199 @@ def inference_person(person_class):
     mod_js = transform_json(res['results']['bindings'])
 
     return mod_js
+
+def execute_spin():
+    spin_rules = {""" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+
+INSERT {
+  ?media a sub:Movie .
+} WHERE {
+  ?media a schema:Media .
+  ?media pred:type ?type_id .
+  ?type_id pred:real_name "Movie" .
+}
+""", 
+"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+
+INSERT {
+  ?media a sub:TVShow .
+} WHERE {
+  ?media a schema:Media .
+  ?media pred:type ?type_id .
+  ?type_id pred:real_name "TV Show" .
+} """, """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Adults .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-14" || ?rating = "TV-MA" || ?rating = "R" || ?rating = "NC-17")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Kids .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-Y" || ?rating = "TV-G" || ?rating = "TV-PG" || ?rating = "G")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Teens .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-Y7" || ?rating = "TV-Y7-FV" || ?rating = "PG" || ?rating = "PG-13")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:LongMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) > 90)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:LongTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) >= 2)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:ShortMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) <= 90)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:ShortTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) < 2)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:OldMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) < 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:RecentMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) >= 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:OldTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) < 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:RecentTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) >= 2000)
+}
+"""}
+    
+    for rule in spin_rules:
+        response = sparql_update(rule, repo_name)
+        if response.status_code == 200:
+            return {'error': 'Failed to run SPIN rules: ' + response.text}
+        
+    return {}
