@@ -1364,4 +1364,4 @@ INSERT {
         if response.status_code == 200:
             return {'error': 'Failed to run SPIN rules: ' + response.text}
         
-    return {}
+    return {'success': 'Successful loading of the SPIN rules. Run again to be sure everything is loaded.'}
