@@ -1,6 +1,6 @@
 from urllib.parse import quote
 from django.shortcuts import render
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 import logging
 import json
 from s4api.graphdb_api import GraphDBApi
@@ -261,27 +261,6 @@ def delete(request):
     return render(request, 'delete.html')
 
 
-def unified_search(query):
-    results = []
-    
-    genres = fetch_genres(accessor, repo_name)
-    directors = fetch_directors(accessor, repo_name)
-    actors = fetch_actors(accessor, repo_name)
-    
-    if query in actors:
-        results.extend(cast_search(query))
-        
-    if query in genres:
-        results.extend(genres_search(query))
-    
-    if query in directors:
-        results.extend(search_director(query))
-
-    if not results:
-        results.extend(movie_search(query))
-
-    return results
-
 
 
 def search(request):
@@ -379,6 +358,7 @@ def search_alternative(request):
     date_results = None
     genres_results = None
     director_results = None
+    unified_results = None
     prompt = None
 
     if request.method == 'POST':
@@ -403,6 +383,12 @@ def search_alternative(request):
             director_results = search_director(prompt)
             num_results = len(director_results)
 
+        if "unified_search" in request.POST:
+            prompt = request.POST.get('unified_search')
+            unified_results = unified_search(prompt)
+            num_results = len(unified_results)
+
+
         return render(request, 'search.html', 
                       {'movie_form': movie_form, 
                        'cast_form': cast_form, 
@@ -413,7 +399,8 @@ def search_alternative(request):
                        'cast_results': cast_search_results,
                        'date_results': date_results,
                        'genres_results': genres_results,
-                       'director_results': director_results, 
+                       'director_results': director_results,
+                       'unified_results': unified_results, 
                        'num_results': num_results,
                        'prompt': prompt})
 
@@ -421,6 +408,28 @@ def search_alternative(request):
                                            'between_dates_form': between_dates_form,
                                              'date_form': date_form, 'genres_form': genres_form,
                                              'director_form': director_form})
+
+def unified_search(query):
+    results = []
+
+    genres = fetch_genres(accessor, repo_name)
+    directors = fetch_directors(accessor, repo_name)
+    actors = fetch_actors(accessor, repo_name)
+    
+    if query in actors:
+        results.extend(cast_search(query))
+        
+    if query in genres:
+        results.extend(genres_search(query))
+    
+    if query in directors:
+        results.extend(search_director(query))
+
+    if not results:
+        results.extend(movie_search(query))
+
+    return results
+
 
 def transform_json(json_data):
     if not json_data:
@@ -949,3 +958,410 @@ def fetch_all_movies():
     return json.loads(res)["results"]["bindings"]
 
 
+def inferences(request):
+    if request.method == 'POST':
+        if 'spin' in request.POST:
+            context = execute_spin()
+            return render(request, 'inferences.html', context)
+        
+        if 'person_search' in request.POST:
+            person = request.POST.get('person_type')
+            person_class = ''
+            prompt = ''
+            match person:
+                case 'Actor':
+                    prompt += 'Actors'
+                    person_class = "?person_id rdf:type sub:Actor ."
+                case 'Director':
+                    prompt += 'Directors'
+                    person_class = "?person_id rdf:type sub:Director ."
+                case 'AllPeople':
+                    prompt += 'Everyone'
+                    person_class = "?person_id rdf:type schema:Person ."
+
+            results = inference_person(person_class)
+            num_results = len(results)
+            if num_results > 200:
+                results = results[:200]
+            return render(request, 'inferences.html', {'results_person': results, 'num_results': num_results, 'prompt': prompt})
+
+        selected_type = request.POST.get('type')
+        selected_rating = request.POST.get('rating')
+        selected_duration = request.POST.get('duration')
+
+        prompt = ''
+
+        movOrShow = None  # False = movie, True = TV show, None = all
+
+        if selected_type in ["Movie", "OldMovie", "RecentMovie"]:
+            movOrShow = False
+        elif selected_type in ["TVShow", "OldTVShow", "RecentTVShow"]:
+            movOrShow = True
+
+        if selected_duration in ["LongMovie", "ShortMovie"] and movOrShow:
+            return render(request, 'inferences.html', {
+                'error': 'Short Movie does not correspond to TV Shows',
+                'selectedType': selected_type,
+                'selectedRating': selected_rating,
+                'selectedDuration': selected_duration
+            })
+        if selected_duration in ["LongTVShow", "ShortTVShow"] and movOrShow is False:
+            return render(request, 'inferences.html', {
+                'error': 'Long TV Show does not correspond to Movies',
+                'selectedType': selected_type,
+                'selectedRating': selected_rating,
+                'selectedDuration': selected_duration
+            })
+
+        match selected_type:
+            case "Media":
+                movOrShow = None
+                prompt += 'All Media '
+                type_class = '?media rdf:type schema:Media .'
+            case "Movie":
+                movOrShow = False
+                prompt += 'Movies '
+                type_class = '?media rdf:type sub:Movie .'
+            case "OldMovie":
+                movOrShow = False
+                prompt += 'Old movies '
+                type_class = '?media rdf:type sub:OldMovie .'
+            case "RecentMovie":
+                movOrShow = False
+                prompt += 'Recent movies '
+                type_class = '?media rdf:type sub:RecentMovie .'
+            case "TVShow":
+                movOrShow = True
+                prompt += 'TV Shows '
+                type_class = '?media rdf:type sub:TVShow .'
+            case "OldTVShow":
+                movOrShow = True
+                prompt += 'Old TV Shows '
+                type_class = '?media rdf:type sub:OldTVShow .'
+            case "RecentTVShow":
+                movOrShow = True
+                prompt += 'Recent TV Shows '
+                type_class = '?media rdf:type sub:RecentTVShow .'
+
+        match selected_rating:
+            case "NoRating":
+                rating = ''
+            case "Kids":
+                prompt += 'for kids '
+                rating = '?media rdf:type sub:Kids .'
+            case "Teens":
+                prompt += 'for teens '
+                rating = '?media rdf:type sub:Teens .'
+            case "Adults":
+                prompt += 'for adults '
+                rating = '?media rdf:type sub:Adults .'
+
+        match selected_duration:
+            case "AllDuration":
+                duration = ''
+            case "LongMovie":
+                prompt += 'that are long '
+                duration = '?media rdf:type sub:LongMovie .'
+            case "ShortMovie":
+                prompt += 'that are short '
+                duration = '?media rdf:type sub:ShortMovie .'
+            case "LongTVShow":
+                prompt += 'that are long '
+                duration = '?media rdf:type sub:LongTVShow .'
+            case "ShortTVShow":
+                prompt += 'that are short '
+                duration = '?media rdf:type sub:ShortTVShow .'
+
+        results = inference_media(type_class, rating, duration)
+        num_results = len(results)
+        if num_results > 200:
+            results = results[:200]
+        return render(request, 'inferences.html', {'results': results, 'num_results': num_results, 'prompt': prompt})
+
+        
+    return render(request, 'inferences.html', {'num': 100})
+
+def inference_media(type_class, rating, duration):
+    query = """
+        PREFIX schema: <https://schema.org/>
+        PREFIX netflix: <http://ws.org/netflix_info/>
+        PREFIX pred: <http://ws.org/netflix_info/pred/>
+        PREFIX sub: <http://ws.org/netflix_info/sub/>
+        PREFIX dc: <http://purl.org/dc/elements/1.1/>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX ex: <http://example.org/>
+
+        SELECT ?type ?title ?director (GROUP_CONCAT(DISTINCT ?cast; separator=", ") AS ?mergedCasts)
+                    ?country ?date_added ?release ?rating ?duration 
+                    (GROUP_CONCAT(DISTINCT ?genres; separator=", ") AS ?mergedGenres) ?description
+        WHERE {
+            _type_class_
+            _rating_
+            _duration_
+            
+            ?media pred:title ?title_id .
+            ?title_id pred:real_name ?title .
+            
+            ?media pred:duration ?duration_id .
+            ?duration_id pred:real_name ?duration .
+            
+            ?media pred:cast ?cast_id .
+            ?cast_id pred:real_name ?cast .
+            
+            ?media pred:director ?director_id .
+            ?director_id pred:real_name ?director .
+            
+            ?media pred:release_year ?release_id .
+            ?release_id pred:real_name ?release .
+            
+            ?media pred:description ?description_id .
+            ?description_id pred:real_name ?description .
+            
+            ?media pred:type ?type_id .
+            ?type_id pred:real_name ?type .
+            
+            ?media pred:country ?country_id .
+            ?country_id pred:real_name ?country .
+            
+            ?media pred:date_added ?date_added_id .
+            ?date_added_id pred:real_name ?date_added .
+            
+            ?media pred:rating ?rating_id .
+            ?rating_id pred:real_name ?rating .
+            
+            ?media pred:listed_in ?genres_id .
+            ?genres_id pred:real_name ?genres .
+        } GROUP BY ?type ?title ?director ?country ?date_added ?release ?rating ?duration ?description
+        """
+    
+    query = query.replace("_type_class_", type_class)
+    query = query.replace("_rating_", rating)
+    query = query.replace("_duration_", duration)
+    
+    payload_query = { "query": query }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
+    res = json.loads(res)
+
+    mod_js =  transform_json(res['results']['bindings'])
+
+    return mod_js
+
+def inference_person(person_class):
+    query = """
+            PREFIX pred: <http://ws.org/netflix_info/pred/>
+            PREFIX sub: <http://ws.org/netflix_info/sub/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX schema: <https://schema.org/>
+            SELECT ?person
+            WHERE {
+                _class_
+                ?person_id pred:real_name ?person .
+            }
+            """
+    query = query.replace("_class_", person_class)
+
+    payload_query = { "query": query }
+    res = accessor.sparql_select(body=payload_query, repo_name=repo_name)    
+    res = json.loads(res)
+
+    mod_js = transform_json(res['results']['bindings'])
+
+    return mod_js
+
+def execute_spin():
+    spin_rules = {""" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+
+INSERT {
+  ?media a sub:Movie .
+} WHERE {
+  ?media a schema:Media .
+  ?media pred:type ?type_id .
+  ?type_id pred:real_name "Movie" .
+}
+""", 
+"""PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+
+INSERT {
+  ?media a sub:TVShow .
+} WHERE {
+  ?media a schema:Media .
+  ?media pred:type ?type_id .
+  ?type_id pred:real_name "TV Show" .
+} """, """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Adults .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-14" || ?rating = "TV-MA" || ?rating = "R" || ?rating = "NC-17")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Kids .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-Y" || ?rating = "TV-G" || ?rating = "TV-PG" || ?rating = "G")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:Teens .
+} WHERE {
+  ?movie a schema:Media .
+    ?movie pred:rating ?rating_id .
+    ?rating_id pred:real_name ?rating .
+    FILTER(?rating = "TV-Y7" || ?rating = "TV-Y7-FV" || ?rating = "PG" || ?rating = "PG-13")
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:LongMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) > 90)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:LongTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) >= 2)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:ShortMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) <= 90)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:ShortTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:duration ?duration_id .
+  ?duration_id pred:real_name ?duration .
+  
+  FILTER(xsd:integer(REPLACE(?duration, "[^0-9]", "")) < 2)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:OldMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) < 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:RecentMovie .
+} WHERE {
+  ?movie a sub:Movie .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) >= 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:OldTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) < 2000)
+}
+""", """PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sub: <http://ws.org/netflix_info/sub/>
+PREFIX schema: <https://schema.org/>
+PREFIX pred: <http://ws.org/netflix_info/pred/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+INSERT {
+  ?movie a sub:RecentTVShow .
+} WHERE {
+  ?movie a sub:TVShow .
+  ?movie pred:release_year ?release_year .
+  ?release_year pred:real_name ?release .
+  
+  FILTER(xsd:integer(?release) >= 2000)
+}
+"""}
+    
+    for rule in spin_rules:
+        response = sparql_update(rule, repo_name)
+        if response.status_code == 200:
+            return {'error': 'Failed to run SPIN rules: ' + response.text}
+        
+    return {'success': 'Successful loading of the SPIN rules. Run again to be sure everything is loaded.'}
