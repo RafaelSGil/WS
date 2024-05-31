@@ -63,15 +63,15 @@
         </div>
     </div>
   -->
-
   {% if search_performed %}
-    <h2 class="text-white">Actor Information</h2>
+    <h2 class="text-white">{{ actor_info.actor_name }}</h2>
     {% if actor_info %}
       <div class="actor-info">
-        <p><strong>Abstract:</strong> {{ actor_info.abstract }}</p>
-        <p><strong>Birth Date:</strong> {{ actor_info.birthDate }}</p>
-        <p><strong>Birth Place:</strong> {{ actor_info.birthPlace }}</p>
-        <p><strong>Thumbnail:</strong> <img src="{{ actor_info.thumbnail }}" alt="{{ form.search_query.value }}" /></p>
+        <p style="color: white;"><strong>Occupations:</strong> {{ actor_info.occupations }}</p>
+        <p style="color: white; font-size:medium"><strong>Biography:</strong> {{ actor_info.abstract }}</p>
+        <p style="color: white;"><strong>Birth Date:</strong> {{ actor_info.birthDate }}</p>
+        <p style="color: white;"><strong>Birth Place:</strong> {{ actor_info.birthPlace }}</p>
+        <img src="{{ actor_info.thumbnail }}" alt="{{ form.search_query.value }}" /></p>
       </div>
     {% else %}
       <p>No information found for the actor.</p>
@@ -79,7 +79,7 @@
   {% endif %}
   {% if results %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
-  <h2 class="text-white">Your Search Results:</h2>
+  <h2 class="text-white">Movies:</h2>
   <div class="row">
     {% for entry in results %}
     <div class="col-md-4">

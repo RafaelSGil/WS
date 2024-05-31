@@ -25,16 +25,14 @@ def home(request):
     all_result = None
     search_performed = False
     actor_info = None
-    print("HEREE")
-    
+
     if request.method == 'POST':
         # Determine which form is being submitted
         if 'movie_search' in request.POST:
             form = SearchForm(request.POST)
             if form.is_valid():
                 query = form.cleaned_data['search_query']
-                actor_info = fetch_actor_info(query)
-                print(actor_info)
+                actor_info = actors_info(query)
                 results = unified_search(query)
                 search_performed = True
         elif 'between_dates_search' in request.POST:
@@ -268,16 +266,11 @@ def delete(request):
 
 def unified_search(query):
     results = []
-    print("YOOOOOOOOOOOOOO")
     genres = fetch_genres(accessor, repo_name)
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
-    print(actors)
     if query in actors:
         results.extend(cast_search(query))
-        actor_info = fetch_actor_info(query)
-        print(actor_info)
-        
         
     if query in genres:
         results.extend(genres_search(query))
@@ -291,7 +284,7 @@ def unified_search(query):
     return results
 
 
-def fetch_actor_info(actor_name):
+def actors_info(actor_name):
     formatted_name = actor_name.replace(" ", "_")
     actor_uri = f"http://dbpedia.org/resource/{formatted_name}"
     
@@ -300,38 +293,55 @@ def fetch_actor_info(actor_name):
     PREFIX dbp: <http://dbpedia.org/property/>
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-    SELECT ?abstract ?birthDate ?birthPlace ?thumbnail WHERE {{
+    SELECT ?abstract ?birthDate ?birthPlace ?thumbnail (GROUP_CONCAT(?occupation; separator=", ") AS ?occupations) WHERE {{
       <{actor_uri}> dbo:abstract ?abstract .
-      OPTIONAL {{ <{actor_uri}> dbo:birthDate ?birthDate . }}
-      OPTIONAL {{ <{actor_uri}> dbo:birthPlace ?birthPlace . }}
+      OPTIONAL {{ <{actor_uri}> dbp:birthDate ?birthDate . }}
+      OPTIONAL {{ <{actor_uri}> dbp:birthPlace ?birthPlace . }}
       OPTIONAL {{ <{actor_uri}> dbo:thumbnail ?thumbnail . }}
+      OPTIONAL {{ <{actor_uri}> dbp:occupation ?occupation . }}
       FILTER (lang(?abstract) = 'en')
+
     }}
     LIMIT 1
     """
     
-    sparql_url = 'https://dbpedia.org/sparql'
+    sparql_url = 'http://dbpedia.org/sparql'
     headers = {'Accept': 'application/json'}
     response = requests.get(sparql_url, params={'query': query}, headers=headers)
-    
+    #print(response.json().get('results', {}).get('bindings', []))
+    print(response)
     if response.status_code == 200:
         results = response.json().get('results', {}).get('bindings', [])
-        print(results)
         if results:
             result = results[0]
             return {
+                'actor_name': actor_name,
                 'abstract': result.get('abstract', {}).get('value', 'N/A'),
                 'birthDate': result.get('birthDate', {}).get('value', 'N/A'),
                 'birthPlace': result.get('birthPlace', {}).get('value', 'N/A'),
-                'thumbnail': result.get('thumbnail', {}).get('value', 'N/A')
+                'thumbnail': result.get('thumbnail', {}).get('value', 'N/A'),
+                'occupations' : result.get('occupations', {}).get('value', 'N/A') 
             }
     return {
         'abstract': 'N/A',
         'birthDate': 'N/A',
         'birthPlace': 'N/A',
-        'thumbnail': 'N/A'
+        'thumbnail': 'N/A',
+        'occupations' : 'N/A'
     }
 
+def get_actor_uri(actor_name):
+    lookup_url = "https://lookup.dbpedia.org/api/search"
+    params = {
+        'query': actor_name,
+        'format': 'json'
+    }
+    response = requests.get(lookup_url, params=params, headers={'Accept': 'application/json'})
+    results = response.json()['docs']
+    for result in results:
+        if 'Actor' in result['rdf:type']:
+            return result['resource'][0]
+    return None
 
 def search(request):
     num_results = 0
@@ -435,6 +445,7 @@ def search_alternative(request):
             prompt = request.POST.get('cast_search')
             cast_search_results = cast_search(prompt)
             num_results = len(cast_search_results)
+                
         
         if "date_search" in request.POST:
             prompt = request.POST.get('date_search')
