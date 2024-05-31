@@ -80,7 +80,8 @@
     {% for entry in movie_results %}
     <div class="col-md-4">
       <div class="card mb-4">
-        <div class="card-body">
+        {% include "film_card.html" with data=entry %}
+        <!-- <div class="card-body">
           <h5 class="card-title">{{ entry.title.value }}</h5>
           
           <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
@@ -131,7 +132,7 @@
           <p class="card-text">
             <strong>Description:</strong> {{ entry.description.value }}
           </p>
-        </div>
+        </div> -->
       </div>
     </div>
     {% endfor %}
@@ -148,7 +149,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in cast_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
             <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -187,7 +189,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
   </div>
@@ -204,7 +206,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in unified_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
             <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -243,7 +246,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
   </div>
@@ -260,7 +263,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in between_dates_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
           <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -298,7 +302,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
 </div>
@@ -315,7 +319,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in date_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
           <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -353,7 +358,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
 </div>
@@ -371,7 +376,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in genres_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
           <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -409,7 +415,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
 </div>
@@ -426,7 +432,8 @@
   <div class="container-card" onwheel="horizontalScroll(event)">
     {% for entry in director_results %}
     <div class="card flex-grow-1">
-      <div class="card-body">
+      {% include "film_card.html" with data=entry %}
+      <!-- <div class="card-body">
         <h5 class="card-title card-break">{{ entry.title.value }}</h5>
         <form class="mb-3" action="{% url 'search_alternative' %}" method="post">
           <p class="card-text toggle-text"><strong>Cast:</strong> 
@@ -464,7 +471,7 @@
         <p class="card-text card-break toggle-text"><strong>Rating:</strong> {{ entry.rating.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Duration:</strong> {{ entry.duration.value }}</p>
         <p class="card-text card-break toggle-text"><strong>Description:</strong> {{ entry.description.value }}</p>
-      </div>
+      </div> -->
     </div>
     {% endfor %}
 </div>
