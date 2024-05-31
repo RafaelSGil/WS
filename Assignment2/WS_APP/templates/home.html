@@ -63,6 +63,7 @@
         </div>
     </div>
   -->
+
   {% if search_performed %}
     <h2 class="text-white">{{ actor_info.actor_name }}</h2>
     {% if actor_info %}
@@ -80,6 +81,7 @@
   {% if results %} {% load static %}
   <link rel="stylesheet" href="{% static 'css/search.css' %}" />
   <h2 class="text-white">Movies:</h2>
+
   <div class="row">
     {% for entry in results %}
     <div class="col-md-4">
