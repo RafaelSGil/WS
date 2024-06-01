@@ -296,20 +296,25 @@ def actors_info(actor_name):
         results = response.json().get('results', {}).get('bindings', [])
         if results:
             result = results[0]
+            occup_formated = {}
+            if result['occupations']['value'] != "":
+                occup_formated = result['occupations']['value'].split(", ")
+                occup_formated.pop(0)
             return {
                 'actor_name': actor_name,
                 'abstract': result.get('abstract', {}).get('value', 'N/A'),
                 'birthDate': result.get('birthDate', {}).get('value', 'N/A'),
                 'birthPlace': result.get('birthPlace', {}).get('value', 'N/A'),
                 'thumbnail': result.get('thumbnail', {}).get('value', 'N/A'),
-                'occupations' : result.get('occupations', {}).get('value', 'N/A') 
+                'occupations' : occup_formated if len(occup_formated) != 0 else ['N/A']
+                ##'occupations' : result.get('occupations', {}).get('value', 'N/A') 
             }
     return {
         'abstract': 'N/A',
         'birthDate': 'N/A',
         'birthPlace': 'N/A',
         'thumbnail': 'N/A',
-        'occupations' : 'N/A'
+        'occupations' : ['N/A']
     }
 
 def get_actor_uri(actor_name):
