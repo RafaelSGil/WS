@@ -78,9 +78,25 @@
               {% if not forloop.last %} | {% endif %}
             {%endfor%}
           </p>
-          <p style="color: white; font-size:medium"><strong>Biography:</strong><span class="p-note">{{ actor_info.abstract }}</span></p>
-          <p style="color: white;"><strong>Birth Date:</strong><span class="dt-bday">{{ actor_info.birthDate }}</span></p>
-          <p style="color: white;"><strong>Birth Place:</strong><a rel="bdayplace" href="http://ws.org//{{actor_info.actor_name}}//birthPlace">{{ actor_info.birthPlace }}</a></p>
+          <p style="color: white; font-size:medium">
+            <strong>Biography:</strong>
+            <span class="p-note">{{ actor_info.abstract }}</span>
+          </p>
+          <p style="color: white;">
+            <strong>Birth Date:</strong>
+            <span class="dt-bday">{{ actor_info.birthDate }}</span>
+          </p>
+          <!-- <p style="color: white;"><strong>Birth Place:</strong><a rel="bdayplace" href="http://ws.org//{{actor_info.actor_name}}//birthPlace">{{ actor_info.birthPlace }}</a></p> -->
+          <!-- <p style="color: white;">
+            <strong>Birth Place: </strong>
+            <span class="p-x-bdayplace">{{ actor_info.birthPlace }}</span>
+          </p> -->
+          <p style="color: white;">
+            <strong>Birth Place:</strong>
+            <span class="bdayplace">
+              <span class="h-adr p-country-name">{{ actor_info.birthPlace }}</span>
+            </span>
+          </p>
           <img class="u-photo" src="{{ actor_info.thumbnail }}" alt="{{ form.search_query.value }}" /></p>
         </div>
       {% else %}
