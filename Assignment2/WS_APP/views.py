@@ -26,7 +26,7 @@ def home(request):
     results = None
     all_result = None
     search_performed = False
-    actor_info = None
+    actor_director_info = None
 
     if request.method == 'POST':
         # Determine which form is being submitted
@@ -34,7 +34,7 @@ def home(request):
             form = SearchForm(request.POST)
             if form.is_valid():
                 query = form.cleaned_data['search_query']
-                actor_info = actors_info(query)
+                actor_director_info = actors_directors_info(query)
                 results = unified_search(query)
                 search_performed = True
         elif 'between_dates_search' in request.POST:
@@ -66,7 +66,7 @@ def home(request):
         'genre_grid': genres_grid_res,
         'cast_grid': ["Will Smith", "Margot Robbie", "Nicole Kidman", "Brad Pitt"],
         'director_grid': ["Steven Spielberg", "Martin Scorsese", "Quentin Tarantino", "Tim Burton"],
-        'actor_info' : actor_info,
+        'actor_director_info' : actor_director_info,
     }
     return render(request, 'home.html', context)
 
@@ -266,9 +266,9 @@ def delete(request):
     return render(request, 'delete.html')
 
 
-def actors_info(actor_name):
-    formatted_name = actor_name.replace(" ", "_")
-    actor_uri = f"http://dbpedia.org/resource/{formatted_name}"
+def actors_directors_info(person_name):
+    formatted_name = person_name.replace(" ", "_")
+    person_uri = f"http://dbpedia.org/resource/{formatted_name}"
     
     query = f"""
     PREFIX dbo: <http://dbpedia.org/ontology/>
@@ -276,11 +276,11 @@ def actors_info(actor_name):
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
     SELECT ?abstract ?birthDate ?birthPlace ?thumbnail (GROUP_CONCAT(?occupation; separator=", ") AS ?occupations) WHERE {{
-      <{actor_uri}> dbo:abstract ?abstract .
-      OPTIONAL {{ <{actor_uri}> dbp:birthDate ?birthDate . }}
-      OPTIONAL {{ <{actor_uri}> dbp:birthPlace ?birthPlace . }}
-      OPTIONAL {{ <{actor_uri}> dbo:thumbnail ?thumbnail . }}
-      OPTIONAL {{ <{actor_uri}> dbp:occupation ?occupation . }}
+      <{person_uri}> dbo:abstract ?abstract .
+      OPTIONAL {{ <{person_uri}> dbp:birthDate ?birthDate . }}
+      OPTIONAL {{ <{person_uri}> dbp:birthPlace ?birthPlace . }}
+      OPTIONAL {{ <{person_uri}> dbo:thumbnail ?thumbnail . }}
+      OPTIONAL {{ <{person_uri}> dbp:occupation ?occupation . }}
       FILTER (lang(?abstract) = 'en')
 
     }}
@@ -301,7 +301,7 @@ def actors_info(actor_name):
                 occup_formated = result['occupations']['value'].split(", ")
                 occup_formated.pop(0)
             return {
-                'actor_name': actor_name,
+                'actor_director_name': person_name,
                 'abstract': result.get('abstract', {}).get('value', 'N/A'),
                 'birthDate': result.get('birthDate', {}).get('value', 'N/A'),
                 'birthPlace': result.get('birthPlace', {}).get('value', 'N/A'),

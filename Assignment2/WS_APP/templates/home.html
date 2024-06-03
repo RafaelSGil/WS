@@ -67,24 +67,24 @@
   {% if search_performed %}
     <div class="h-card">  
       <h2 class="text-white">
-        <span class="p-name">{{ actor_info.actor_name }}</span>
+        <span class="p-name">{{ actor_director_info.actor_director_name }}</span>
       </h2>
-      {% if actor_info %}
+      {% if actor_director_info %}
         <div class="actor-info">
           <p style="color: white;">
             <strong>Occupations:</strong>
-            {%for r in actor_info.occupations %}
+            {%for r in actor_director_info.occupations %}
               <span class="p-role"> {{ r }}</span>
               {% if not forloop.last %} | {% endif %}
             {%endfor%}
           </p>
           <p style="color: white; font-size:medium">
             <strong>Biography:</strong>
-            <span class="p-note">{{ actor_info.abstract }}</span>
+            <span class="p-note">{{ actor_director_info.abstract }}</span>
           </p>
           <p style="color: white;">
             <strong>Birth Date:</strong>
-            <span class="dt-bday">{{ actor_info.birthDate }}</span>
+            <span class="dt-bday">{{ actor_director_info.birthDate }}</span>
           </p>
           <!-- <p style="color: white;"><strong>Birth Place:</strong><a rel="bdayplace" href="http://ws.org//{{actor_info.actor_name}}//birthPlace">{{ actor_info.birthPlace }}</a></p> -->
           <!-- <p style="color: white;">
@@ -94,7 +94,7 @@
           <p style="color: white;">
             <strong>Birth Place:</strong>
             <span class="bdayplace">
-              <span class="h-adr p-country-name">{{ actor_info.birthPlace }}</span>
+              <span class="h-adr p-country-name">{{ actor_director_info.birthPlace }}</span>
             </span>
           </p>
           <img class="u-photo" src="{{ actor_info.thumbnail }}" alt="{{ form.search_query.value }}" /></p>
