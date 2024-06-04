@@ -1,0 +1,111 @@
+@prefix schema: <https://schema.org/> .
+@prefix netflix: <http://ws.org/netflix_info/> .
+@prefix pred: <http://ws.org/netflix_info/pred/> .
+@prefix sub: <http://ws.org/netflix_info/sub/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Classes
+schema:Media rdf:type rdfs:Class .
+schema:Person rdf:type rdfs:Class .
+
+# Sub-Classes
+sub:TVShow rdf:type rdfs:Class ;
+    rdfs:subClassOf schema:Media .
+
+sub:Movie rdf:type rdfs:Class ;
+    rdfs:subClassOf schema:Media . 
+
+sub:Adults rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
+sub:Teens rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
+sub:Kids rdf:type rdfs:Class;
+    rdfs:subClassOf schema:Media .
+
+sub:Actor rdf:type rdfs:Class ;
+    rdfs:subClassOf schema:Person .
+
+sub:Director rdf:type rdfs:Class ;
+    rdfs:subClassOf schema:Person .
+
+# Sub Sub-Classes
+sub:OldMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:RecentMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:LongMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:ShortMovie rdf:type rdfs:Class;
+    rdfs:subClassOf sub:Movie .
+
+sub:OldTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:RecentTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:LongTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+sub:ShortTVShow rdf:type rdfs:Class;
+    rdfs:subClassOf sub:TVShow .
+
+# Properties
+pred:text rdf:type rdf:Property .
+
+pred:rating rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:string .
+
+pred:real_name rdf:type rdf:Property ;
+    rdfs:range xsd:string .
+
+pred:director rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range sub:Director .
+
+pred:title rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:string .
+
+pred:cast rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range sub:Actor .
+
+pred:type rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:string .
+
+pred:date_added rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:date .
+
+pred:duration rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:duration .
+
+pred:release_year rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:gYear .
+
+pred:listed_in rdf:type rdf:Property ;
+    rdfs:domain schema:Media ;
+    rdfs:range xsd:string .
+
+# Sub-Properties
+pred:rating rdfs:subPropertyOf pred:text .
+pred:real_name rdfs:subPropertyOf pred:text .
+pred:title rdfs:subPropertyOf pred:text .
+pred:type rdfs:subPropertyOf pred:text .
+pred:listed_in rdfs:subPropertyOf pred:text .
+
+pred:date_added rdfs:subPropertyOf pred:date .
+pred:release_year rdfs:subPropertyOf pred:date .

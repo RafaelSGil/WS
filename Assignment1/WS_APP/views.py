@@ -24,13 +24,17 @@ def home(request):
     results = None
     all_result = None
     search_performed = False
-
+    actor_info = None
+    print("HEREE")
+    
     if request.method == 'POST':
         # Determine which form is being submitted
         if 'movie_search' in request.POST:
             form = SearchForm(request.POST)
             if form.is_valid():
                 query = form.cleaned_data['search_query']
+                actor_info = fetch_actor_info(query)
+                print(actor_info)
                 results = unified_search(query)
                 search_performed = True
         elif 'between_dates_search' in request.POST:
@@ -62,6 +66,7 @@ def home(request):
         'genre_grid': genres_grid_res,
         'cast_grid': ["Will Smith", "Margot Robbie", "Nicole Kidman", "Brad Pitt"],
         'director_grid': ["Steven Spielberg", "Martin Scorsese", "Quentin Tarantino", "Tim Burton"],
+        'actor_info' : actor_info,
     }
     return render(request, 'home.html', context)
 
@@ -263,13 +268,16 @@ def delete(request):
 
 def unified_search(query):
     results = []
-    
+    print("YOOOOOOOOOOOOOO")
     genres = fetch_genres(accessor, repo_name)
     directors = fetch_directors(accessor, repo_name)
     actors = fetch_actors(accessor, repo_name)
-    
+    print(actors)
     if query in actors:
         results.extend(cast_search(query))
+        actor_info = fetch_actor_info(query)
+        print(actor_info)
+        
         
     if query in genres:
         results.extend(genres_search(query))
@@ -282,6 +290,47 @@ def unified_search(query):
 
     return results
 
+
+def fetch_actor_info(actor_name):
+    formatted_name = actor_name.replace(" ", "_")
+    actor_uri = f"http://dbpedia.org/resource/{formatted_name}"
+    
+    query = f"""
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX dbp: <http://dbpedia.org/property/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+    SELECT ?abstract ?birthDate ?birthPlace ?thumbnail WHERE {{
+      <{actor_uri}> dbo:abstract ?abstract .
+      OPTIONAL {{ <{actor_uri}> dbo:birthDate ?birthDate . }}
+      OPTIONAL {{ <{actor_uri}> dbo:birthPlace ?birthPlace . }}
+      OPTIONAL {{ <{actor_uri}> dbo:thumbnail ?thumbnail . }}
+      FILTER (lang(?abstract) = 'en')
+    }}
+    LIMIT 1
+    """
+    
+    sparql_url = 'https://dbpedia.org/sparql'
+    headers = {'Accept': 'application/json'}
+    response = requests.get(sparql_url, params={'query': query}, headers=headers)
+    
+    if response.status_code == 200:
+        results = response.json().get('results', {}).get('bindings', [])
+        print(results)
+        if results:
+            result = results[0]
+            return {
+                'abstract': result.get('abstract', {}).get('value', 'N/A'),
+                'birthDate': result.get('birthDate', {}).get('value', 'N/A'),
+                'birthPlace': result.get('birthPlace', {}).get('value', 'N/A'),
+                'thumbnail': result.get('thumbnail', {}).get('value', 'N/A')
+            }
+    return {
+        'abstract': 'N/A',
+        'birthDate': 'N/A',
+        'birthPlace': 'N/A',
+        'thumbnail': 'N/A'
+    }
 
 
 def search(request):
@@ -386,7 +435,6 @@ def search_alternative(request):
             prompt = request.POST.get('cast_search')
             cast_search_results = cast_search(prompt)
             num_results = len(cast_search_results)
-                
         
         if "date_search" in request.POST:
             prompt = request.POST.get('date_search')

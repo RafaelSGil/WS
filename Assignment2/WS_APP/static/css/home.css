@@ -1,0 +1,68 @@
+.container-card {
+  overflow-x: auto;
+  white-space: nowrap;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.card {
+  flex: 0 0 auto;
+  width: 18rem;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body {
+  flex-grow: 1;
+}
+
+.card-break {
+  white-space: break-spaces;
+}
+
+
+
+.search-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.search-form {
+  width: 150%; 
+  max-width: 1000px; /* Maximum width of the form */
+}
+
+
+.search-bar {
+  width: 50%;
+}
+
+
+
+
+/* Custom styles for larger form controls */
+.form-control-lg {
+  font-size: 1.25rem; /* Larger text size */
+  height: calc(1.5em + 1rem + 2px); /* Taller input fields */
+  padding: .5rem 1rem; /* Larger padding for better readability */
+}
+
+.btn-lg {
+  padding: .5rem 1rem; /* Larger padding */
+  font-size: 1.25rem; /* Larger text size */
+  border-radius: .3rem; /* Optional: Adjust border-radius if needed */
+}
+
+
+
+.modal-body .col-md-6 {
+  padding-right: 15px; /* Adds spacing to the right of each form column */
+}
+
+/* Alternatively, you can add padding to the forms themselves */
+form {
+  padding: 10px; /* Adds padding inside each form for spacing */
+}
